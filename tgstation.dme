@@ -9841,6 +9841,7 @@
 #include "modular_regzt\code\modules\random_item\makeshift_tool.dm"
 #include "modular_regzt\code\modules\random_item\material_item.dm"
 #include "modular_regzt\code\modules\random_item\random_nodes.dm"
+#include "modular_regzt\code\modules\random_item\rcd_hand.dm"
 #include "modular_regzt\code\modules\random_item\spot.dm"
 #include "modular_regzt\code\modules\random_item\stock_parts.dm"
 #include "modular_regzt\code\modules\random_item\quirk\quirk_all.dm"
