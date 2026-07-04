@@ -1409,6 +1409,10 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_NO_MINDSWAP "no_mindswap"
 ///trait given to food that can be baked by /datum/component/bakeable
 #define TRAIT_BAKEABLE "bakeable"
+///trait given to food that can be microwaved by /datum/component/microwable
+#define TRAIT_MICROWAVABLE "microwavable"
+///trait given to food that can be cooked on a grilled by /datum/component/grillable
+#define TRAIT_GRILLABLE "grillable"
 
 /// Trait given to foam darts that have an insert in them
 #define TRAIT_DART_HAS_INSERT "dart_has_insert"
@@ -1671,6 +1675,9 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 
 /// Sunlight on this turf is blocked and thus you can't get solar power or whatever
 #define TRAIT_TURF_SUN_BLOCKED "turf_sun_blocked"
+
+/// Cannot be backstabbed with a crusher
+#define TRAIT_BACKSTAB_IMMUNE "backstab_immune"
 
 /// Makes the owner immune from the pacification from synthpax
 #define TRAIT_SYNTHPAX_IMMUNE "synthpax_immune"
