@@ -7,7 +7,7 @@ mist
 */
 
 /datum/crafting_recipe/drone_handmade
-	name = "dynamo machine"
+	name = "nand made drone"
 	result = /mob/living/basic/drone/handmade
 	reqs = list(
 		/obj/item/stock_parts/servo = 2,
