@@ -174,6 +174,7 @@
 #define ACCESS_MECH_SECURITY "mech_security"
 #define ACCESS_MECH_SCIENCE "mech_science"
 #define ACCESS_MECH_ENGINE "mech_engine"
+#define ACCESS_MECH_MAKESHIFT "mech_makeshift"
 
 /// - - - ADMIN - - -
 	// Used for admin events and things of the like. Lots of extra space for more admin tools in the future
