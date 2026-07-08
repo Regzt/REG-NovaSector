@@ -18,6 +18,7 @@
 | Codedocs                  | [https://NovaSector.github.io/NovaSector/](https://NovaSector.github.io/NovaSector/)                                                   |
 | Nova Sector's Discord     | [https://discord.gg/novasector](https://discord.gg/novasector)                                                                         |
 | Coderbus Discord          | [https://discord.gg/Vh8TJp9](https://discord.gg/Vh8TJp9)                                                                               |
+| Reg Discord               | [https://discord.gg/39RS6aK3gA](https://discord.gg/39RS6aK3gA)                                                                         |
 
 This is Nova Sector's downstream fork of /tg/station created in byond.
 
