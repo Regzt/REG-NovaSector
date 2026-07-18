@@ -1,0 +1,53 @@
+name: 'Умная синхронизация форка'
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Проверка обновлений каждый день в 08:00 (UTC)
+  workflow_dispatch:     # Кнопка для ручного запуска
+
+jobs:
+  sync_or_pr:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Скачиваем ваш форк (полная история коммитов обязательна)
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Подключаем оригинальный NovaSector и скачиваем обновления
+      - name: Fetch upstream changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com
+          git fetch upstream master
+
+      # 3. Пытаемся влить изменения напрямую. Если есть конфликт — шаг завершится, но не уронит весь экшен
+      - name: Try direct sync
+        id: try_merge
+        continue-on-error: true
+        run: |
+          if git log origin/master..upstream/master --oneline | grep -q .; then
+            echo "Обновления найдены, пробуем автоматический merge..."
+            git merge upstream/master -m "🔄 Авто-синхронизация с NovaSector"
+            git push origin master
+            echo "has_conflicts=false" >> $GITHUB_ENV
+          else
+            echo "Ваш форк уже полностью обновлен!"
+            echo "has_conflicts=none" >> $GITHUB_ENV
+          fi
+
+      # 4. Если на прошлом шаге возник конфликт, этот шаг отменит слияние, создаст новую ветку и откроет Pull Request
+      - name: Create PR on Conflict
+        if: steps.try_merge.outcome == 'failure'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: upstream-sync-conflict
+          base: master
+          title: '⚠️ Конфликт при авто-обновлении из NovaSector'
+          body: |
+            Скрипт не смог автоматически обновить ваш форк из-за нестыковок в коде (конфликтов слияния).
+            Пожалуйста, разрешите конфликты внутри этого Pull Request вручную.
+          commit-message: 'Фиксация конфликта для создания PR'
