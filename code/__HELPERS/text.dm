@@ -88,11 +88,11 @@
  * * Presence of the <, >, \ and / characters.
  * * Presence of ASCII special control characters (horizontal tab and new line not included).
  * */
-/proc/reject_bad_text(text, max_length = 512, ascii_only = TRUE)
+/proc/reject_bad_text(text, max_length = 512, ascii_only = FALSE)
 	if(ascii_only)
-		if(length(text) > max_length)
+		if(length_char(text) > max_length)
 			return null
-		var/static/regex/non_ascii = regex(@"[^\x20-\x7E\t\n]")
+		var/static/regex/non_ascii = regex(@"[^\x20-\x7E\t\nа-яА-ЯёЁ]")
 		if(non_ascii.Find(text))
 			return null
 	else if(length_char(text) > max_length)
