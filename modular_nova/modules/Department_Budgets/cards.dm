@@ -1,3 +1,5 @@
+//REGZT EDIT MOVE TO modular_regzt\modular_celadon\custom_bank_machine\code\machine.dm
+/*
 /obj/item/card/id/departmental_budget/med
 	department_ID = ACCOUNT_MED
 	department_name = ACCOUNT_MED_NAME
@@ -22,6 +24,7 @@
 	department_ID = ACCOUNT_SEC
 	department_name = ACCOUNT_SEC_NAME
 	icon_state = "sec_budget"
+*/
 
 /obj/item/card/id/departmental_budget/ds2
 	department_ID = ACCOUNT_DS2

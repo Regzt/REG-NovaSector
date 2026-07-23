@@ -40,6 +40,11 @@
 	WILDCARD_NAME_COMMAND = list(limit = 2, usage = list()), \
 	WILDCARD_NAME_CAPTAIN = list(limit = 1, usage = list()) \
 )
+//REGZT update for celadon module
+#define WILDCARD_LIMIT_CHAMELEON_ID_EXPANDED list( \
+	WILDCARD_NAME_SYNDICATE = list(limit = -1, usage = list()), \
+	WILDCARD_NAME_AWAY = list(limit = -1, usage = list()) \
+)
 /// Wildcard slot define for admin/debug/weird, special abstract cards. Can hold infinite of any access.
 #define WILDCARD_LIMIT_ADMIN list(WILDCARD_NAME_ALL = list(limit = -1, usage = list()))
 

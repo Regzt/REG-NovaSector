@@ -132,7 +132,7 @@
 
 /client/verb/hotkeys_help()
 	set name = "Hotkeys Help"
-	set hidden = TRUE
+	set category = "OOC"
 
 	if(!GLOB.hotkeys_tgui)
 		GLOB.hotkeys_tgui = new /datum/hotkeys_help()
@@ -141,7 +141,7 @@
 
 /client/verb/emote_panel()
 	set name = "Emote Panel"
-	set hidden = TRUE
+	set category = "IC"
 
 	if(!isliving(mob))
 		to_chat(mob, span_notice("You can only use this while you're alive!"))
