@@ -1,17 +1,27 @@
+/*
 /datum/controller/subsystem/id_access/Initialize()
-	. = ..() //lets load it first for extra i/o safety in case of runtime later
+	. = ..()
 	if(!fexists(PATH_TO_WILDCARD_SETTING_CACHE))
 		return .
 
-	var/json = file(PATH_TO_WILDCARD_SETTING_CACHE)
-	if(!json)
+	var/raw_file = file(PATH_TO_WILDCARD_SETTING_CACHE)
+	if(!raw_file)
 		return .
 
-	json = file2text(json)
-	if(!json)
+	var/json_text = file2text(raw_file)
+
+	fdel(PATH_TO_WILDCARD_SETTING_CACHE)
+
+	if(!json_text)
 		return .
 
-	json = json_decode(json)
+	var/json
+	try
+		json = json_decode(json_text)
+	catch(var/exception/e)
+		log_world("Failed to decode [PATH_TO_WILDCARD_SETTING_CACHE]: [e]")
+		return .
+
 	if(!json)
 		return .
 
@@ -22,5 +32,5 @@
 		message_admins(msg_constructed)
 		log_admin(msg_constructed)
 
-	fdel(PATH_TO_WILDCARD_SETTING_CACHE)
 	return .
+*/

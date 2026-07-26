@@ -1132,7 +1132,8 @@
 /obj/item/card/id/away/filmstudio
 	name = "Film Studio ID"
 	desc = "An ID card that allows access to the variety of airlocks present in the film studio"
-
+//REGZT EDIT move to modular_regzt/modular_celadon/custom_bank_machine/code/machine.dm
+/*
 /obj/item/card/id/departmental_budget
 	name = "departmental card (ERROR)"
 	desc = "Provides access to the departmental budget."
@@ -1140,7 +1141,7 @@
 	var/department_ID = ACCOUNT_CIV
 	var/department_name = ACCOUNT_CIV_NAME
 	registered_age = null
-
+*/
 /obj/item/card/id/departmental_budget/Initialize(mapload)
 	. = ..()
 	var/datum/bank_account/department_account = SSeconomy.get_dep_account(department_ID)
@@ -1171,7 +1172,7 @@
 	desc = "A card used to provide ID and determine access across the station. Has an integrated digital display and advanced microchips."
 	icon_state = "card_grey"
 
-	wildcard_slots = WILDCARD_LIMIT_GREY
+	wildcard_slots = WILDCARD_LIMIT_GOLD
 	flags_1 = UNPAINTABLE_1
 	trim_changeable = TRUE
 
@@ -1358,7 +1359,7 @@
 	icon_state = "card_silver"
 	inhand_icon_state = "silver_id"
 	assigned_icon_state = "assigned_silver"
-	wildcard_slots = WILDCARD_LIMIT_SILVER
+	wildcard_slots = WILDCARD_LIMIT_GOLD
 
 /obj/item/card/id/advanced/robotic
 	name = "magnetic identification card"
@@ -1366,7 +1367,7 @@
 	icon_state = "card_carp" //im not a spriter
 	inhand_icon_state = "silver_id"
 	assigned_icon_state = "assigned_silver"
-	wildcard_slots = WILDCARD_LIMIT_GREY
+	wildcard_slots = WILDCARD_LIMIT_GOLD
 
 /datum/id_trim/maint_reaper
 	access = list(ACCESS_MAINT_TUNNELS)
@@ -1384,7 +1385,7 @@
 	icon_state = "card_platinum"
 	inhand_icon_state = "platinum_id"
 	assigned_icon_state = "assigned_silver"
-	wildcard_slots = WILDCARD_LIMIT_PLATINUM
+	wildcard_slots = WILDCARD_LIMIT_GOLD
 
 /obj/item/card/id/advanced/platinum/Initialize(mapload)
 	. = ..()
@@ -1545,7 +1546,7 @@
 	registered_age = null
 	trim = /datum/id_trim/job/prisoner
 
-	wildcard_slots = WILDCARD_LIMIT_PRISONER
+	wildcard_slots = WILDCARD_LIMIT_GOLD
 
 	/// Number of gulag points required to earn freedom.
 	var/goal = 0
