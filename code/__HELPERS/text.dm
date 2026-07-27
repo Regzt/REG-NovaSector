@@ -88,11 +88,11 @@
  * * Presence of the <, >, \ and / characters.
  * * Presence of ASCII special control characters (horizontal tab and new line not included).
  * */
-/proc/reject_bad_text(text, max_length = 512, ascii_only = TRUE)
+/proc/reject_bad_text(text, max_length = 512, ascii_only = FALSE) // REGZT EDIT CHANGE /proc/reject_bad_text(text, max_length = 512, ascii_only = TRUE)
 	if(ascii_only)
 		if(length(text) > max_length)
 			return null
-		var/static/regex/non_ascii = regex(@"[^\x20-\x7E\t\n]")
+		var/static/regex/non_ascii = regex(@"[^\x20-\x7E\t\nа-яА-ЯёЁ]") // REGZT EDIT CHANGE var/static/regex/non_ascii = regex(@"[^\x20-\x7E\t\n]")
 		if(non_ascii.Find(text))
 			return null
 	else if(length_char(text) > max_length)
@@ -158,7 +158,7 @@
  * * cap_after_symbols - words like Bob's will be capitalized to Bob'S by default. False is good for titles.
  * * cap_at_start - capitalize the start of words. False is good for modular computer file names.
  */
-/proc/reject_bad_name(t_in, allow_numbers = TRUE, max_length = MAX_NAME_LEN, ascii_only = TRUE, strict = FALSE, cap_after_symbols = TRUE, cap_at_start = TRUE) // NOVA EDIT CHANGE - allow_numbers to TRUE - ORIGINAL: /proc/reject_bad_name(t_in, allow_numbers = FALSE, max_length = MAX_NAME_LEN, ascii_only = TRUE, strict = FALSE, cap_after_symbols = TRUE, cap_at_start = TRUE)
+/proc/reject_bad_name(t_in, allow_numbers = TRUE, max_length = MAX_NAME_LEN, ascii_only = FALSE, strict = FALSE, cap_after_symbols = TRUE, cap_at_start = TRUE) //REGZT EDIT CHANGE /proc/reject_bad_name(t_in, allow_numbers = TRUE, max_length = MAX_NAME_LEN, ascii_only = TRUE, strict = FALSE, cap_after_symbols = TRUE, cap_at_start = TRUE) // NOVA EDIT CHANGE - allow_numbers to TRUE - ORIGINAL: /proc/reject_bad_name(t_in, allow_numbers = FALSE, max_length = MAX_NAME_LEN, ascii_only = TRUE, strict = FALSE, cap_after_symbols = TRUE, cap_at_start = TRUE)
 	if(!t_in)
 		return //Rejects the input if it is null
 
@@ -178,14 +178,14 @@
 		char = t_in[i]
 		switch(text2ascii(char))
 
-			// A  .. Z
-			if(65 to 90) //Uppercase Letters
+			// A .. Z + А .. Я
+			if(65 to 90, 1040 to 1071, 1025)
 				number_of_alphanumeric++
 				last_char_group = LETTERS_DETECTED
 
-			// a  .. z
-			if(97 to 122) //Lowercase Letters
-				if(((last_char_group == NO_CHARS_DETECTED || last_char_group == SPACES_DETECTED) && cap_at_start) || (cap_after_symbols && last_char_group == SYMBOLS_DETECTED)) //start of a word
+			// a .. z + А .. Я
+			if(97 to 122, 1072 to 1103, 1105)
+				if(((last_char_group == NO_CHARS_DETECTED || last_char_group == SPACES_DETECTED) && cap_at_start) || (cap_after_symbols && last_char_group == SYMBOLS_DETECTED))
 					char = uppertext(char)
 				number_of_alphanumeric++
 				last_char_group = LETTERS_DETECTED

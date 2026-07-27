@@ -117,7 +117,8 @@ GAME_VERB_HIDDEN(/client, hotkeys_help, "Hotkeys Help")
 		GLOB.hotkeys_tgui = new /datum/hotkeys_help()
 
 	GLOB.hotkeys_tgui.ui_interact(mob)
-
+//NOVA
+/*
 GAME_VERB_HIDDEN(/client, emote_panel, "Emote Panel")
 
 	if(!isliving(mob))
@@ -127,3 +128,13 @@ GAME_VERB_HIDDEN(/client, emote_panel, "Emote Panel")
 	if(!GLOB.emote_panel)
 		GLOB.emote_panel = new /datum/emote_panel()
 	GLOB.emote_panel.ui_interact(mob)
+*/
+//REGZT
+GAME_VERB(/client, emote_panel, "Emote Panel", "IC")
+    if(!isliving(mob))
+        to_chat(mob, span_notice("You can only use this while you're alive!"))
+        return
+
+    if(!GLOB.emote_panel)
+        GLOB.emote_panel = new /datum/emote_panel()
+    GLOB.emote_panel.ui_interact(mob)
