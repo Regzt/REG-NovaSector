@@ -9,6 +9,7 @@
 /// For icon overlays
 /// TinyUnicode 12pt metrics generated using Lummox's dmifontsplus (https://www.byond.com/developer/LummoxJR/DmiFontsPlus)
 /// Note: these variable names have been changed, so you can't straight copy/paste from dmifontsplus.exe
+
 /datum/font/tiny_unicode/size_12pt
 	name = "TinyUnicode 12pt"
 	height = 13

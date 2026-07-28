@@ -9,6 +9,7 @@
 /// For icon overlays
 /// Spess Font 6pt metrics generated using Lummox's dmifontsplus (https://www.byond.com/developer/LummoxJR/DmiFontsPlus)
 /// Note: these variable names have been changed, so you can't straight copy/paste from dmifontsplus.exe
+/*
 /datum/font/spessfont/size_6pt
 	name = "Spess Font 6pt"
 	height = 8
@@ -250,3 +251,4 @@
 		0, 1, 0,	/* char 254 */ \
 		0, 1, 0,	/* char 255 */ \
 		226)
+*/

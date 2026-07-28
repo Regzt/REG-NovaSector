@@ -11,9 +11,9 @@
 /// Factor of how much height will account to exponential decay
 #define CHAT_MESSAGE_HEIGHT_DECAY 0.9
 /// Approximate height in pixels of an 'average' line, used for height decay
-#define CHAT_MESSAGE_APPROX_LHEIGHT 13 // REGZT EDIT CHANGE #define CHAT_MESSAGE_APPROX_LHEIGHT 11
+#define CHAT_MESSAGE_APPROX_LHEIGHT 11
 /// Max width of chat message in pixels
-#define CHAT_MESSAGE_WIDTH 140 // REGZT EDIT CHANGE #define CHAT_MESSAGE_WIDTH 112
+#define CHAT_MESSAGE_WIDTH 112
 /// The dimensions of the chat message icons
 #define CHAT_MESSAGE_ICON_SIZE 9
 
@@ -277,7 +277,7 @@
 	message.pixel_z = starting_height
 	message.pixel_w = -message_loc.base_pixel_w
 	message.maptext_width = CHAT_MESSAGE_WIDTH
-	message.maptext_height = mheight * 1.5 // REGZT EDIT CHANGE message.maptext_height = mheight * 1.25 // We add extra because some characters are superscript, like actions
+	message.maptext_height = mheight * 1.25 // We add extra because some characters are superscript, like actions
 	message.maptext_x = (CHAT_MESSAGE_WIDTH - owner.bound_width) * -0.5
 	message.maptext = MAPTEXT(complete_text)
 
