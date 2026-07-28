@@ -89,7 +89,7 @@ mist
 	category = CAT_TOOLS
 
 /datum/crafting_recipe/matter_bin_handmade
-	name = "handmade matter_bin"
+	name = "handmade matter bin"
 	result = /obj/item/stock_parts/matter_bin/handmade
 	reqs = list(
 		/obj/item/stack/rods = 2,
@@ -215,4 +215,15 @@ mist
 				/obj/item/stack/rods = 2)
 	tool_behaviors = list(TOOL_SCREWDRIVER)
 	time = 30
+	category = CAT_TOOLS
+
+/datum/crafting_recipe/pedalgen
+	name = "Pedal Generator"
+	result = /obj/structure/chair/pedalgen
+	reqs = list(
+		/obj/item/stack/cable_coil = 5,
+		/obj/item/stack/rods = 1,
+		/obj/item/stack/sheet/iron = 10,
+	)
+	tool_behaviors = list(TOOL_SCREWDRIVER, TOOL_WIRECUTTER)
 	category = CAT_TOOLS

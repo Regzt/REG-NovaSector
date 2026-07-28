@@ -10107,6 +10107,7 @@
 #include "modular_regzt\modules\random_item\lockermech.dm"
 #include "modular_regzt\modules\random_item\makeshift_tool.dm"
 #include "modular_regzt\modules\random_item\material_item.dm"
+#include "modular_regzt\modules\random_item\pedalgen.dm"
 #include "modular_regzt\modules\random_item\random_nodes.dm"
 #include "modular_regzt\modules\random_item\rcd_hand.dm"
 #include "modular_regzt\modules\random_item\spot.dm"
