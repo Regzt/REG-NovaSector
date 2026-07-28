@@ -183,7 +183,7 @@
 				number_of_alphanumeric++
 				last_char_group = LETTERS_DETECTED
 
-			// a .. z + А .. Я
+			// a .. z + а .. я
 			if(97 to 122, 1072 to 1103, 1105)
 				if(((last_char_group == NO_CHARS_DETECTED || last_char_group == SPACES_DETECTED) && cap_at_start) || (cap_after_symbols && last_char_group == SYMBOLS_DETECTED))
 					char = uppertext(char)

@@ -319,6 +319,7 @@
 	if(params && message_param)
 		msg = select_param(user, params)
 
+	msg = genderize_decode(user, msg) // REGZT ADDITION
 	msg = replace_pronoun(user, msg)
 
 	if(!msg)
