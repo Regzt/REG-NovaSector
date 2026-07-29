@@ -23,18 +23,17 @@
 	if(excessive_charge)
 		power_to_give *= 2
 
-	//1.APC < 90%
-	var/area/A = get_area(src)
-	if(A && A.apc)
+	// 1. APC < 90%
+	var/area/A = get_area(Pedals ? Pedals : src)
+	if(A && A.apc && A.apc.cell)
 		var/obj/machinery/power/apc/APC = A.apc
-		if(APC.cell)
-			if((APC.cell.charge / APC.cell.maxcharge) < 0.9)
-				var/charge_amount = power_to_give / 100
-				APC.cell.give(charge_amount)
-				APC.update_icon()
-				return
+		if(APC.cell.charge < (APC.cell.maxcharge * 0.9))
+			var/charge_amount = power_to_give
+			APC.cell.charge = min(APC.cell.charge + charge_amount, APC.cell.maxcharge)
+			APC.update_icon()
+			return
 
-	//2.POWERGRID
+	// 2. POWERNET
 	if(powernet)
 		add_avail(power_to_give)
 
@@ -52,6 +51,7 @@
 	custom_materials = list(/datum/material/iron = 20000)
 	var/obj/machinery/power/dynamo/Generator = null
 	var/next_pedal = 0
+	item_chair = null
 
 /obj/structure/chair/pedalgen/Initialize(mapload)
 	. = ..()
@@ -90,6 +90,9 @@
 		if(11 to INFINITY)
 			icon_state = "[initial(icon_state)]_high"
 
+/obj/structure/chair/pedalgen/mouse_drop_dragged(atom/over_object, mob/user, src_location, over_location, params)
+	return NONE
+
 /obj/structure/chair/pedalgen/wrench_act(mob/living/user, obj/item/I)
 	. = ..()
 	default_unfasten_wrench(user, I)
@@ -99,6 +102,24 @@
 	else
 		Generator.disconnect_from_network()
 		Generator.loc = null
+	return TRUE
+
+/obj/structure/chair/pedalgen/atom_deconstruct(disassembled = TRUE)
+	new /obj/item/stack/sheet/iron(loc, 10)
+	new /obj/item/stack/cable_coil(loc, 5)
+	new /obj/item/stack/rods(loc, 1)
+
+/obj/structure/chair/pedalgen/wrench_act_secondary(mob/living/user, obj/item/weapon)
+	if(has_buckled_mobs())
+		to_chat(user, span_warning("Сначала нужно снять того, кто сидит на генераторе!"))
+		return TRUE
+
+	weapon.play_tool_sound(src)
+	user.visible_message(
+		span_notice("[user] разбирает [src] на составляющие."),
+		span_notice("Вы разбираете [src].")
+	)
+	deconstruct(disassembled = TRUE)
 	return TRUE
 
 /obj/structure/chair/pedalgen/attack_hand(mob/user)
