@@ -5,6 +5,7 @@
 	mob_type_allowed_typecache = list(/mob/living, /mob/dead/observer, /mob/eye/imaginary_friend)
 	mob_type_ignore_stat_typecache = list(/mob/dead/observer, /mob/living/silicon/ai, /mob/eye/imaginary_friend)
 
+/*
 /datum/emote/backflip/run_emote(mob/user, params , type_override, intentional)
 	. = ..()
 	// NOVA EDIT ADDITION START - backflips for everyone, but freerunners do it faster
@@ -12,6 +13,7 @@
 		return
 	// NOVA EDIT ADDITION END
 	user.SpinAnimation(FLIP_EMOTE_DURATION, 1, clockwise = FALSE) //Make that backflip!
+*/
 
 /datum/emote/backflip/check_cooldown(mob/user, intentional)
 	. = ..()

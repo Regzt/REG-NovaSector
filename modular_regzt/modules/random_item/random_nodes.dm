@@ -1,18 +1,18 @@
 #define TECHWEB_NODE_BEER_SYNTIZER "integrated beer syntizer"
 
 /datum/techweb_node/beer_cyberimp
-	id = TECHWEB_NODE_BEER_SYNTIZER
+	//id = TECHWEB_NODE_BEER_SYNTIZER
 	display_name = "a REALLY USEFUL implant"
 	description = "opens up the most needed thing in the world for everyone"
-	prereq_ids = list(TECHWEB_NODE_INTERGRATED_TOOLSETS)
-	design_ids = list("integrated beer syntizer")
+	prerequisite_nodes = list(/datum/techweb_node/cyber/integrated_toolsets, /datum/techweb_node/chem_synthesis)
+	unlocked_designs = list(/datum/design/beer_cyberimp)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_1_POINTS)
 	announce_channels = list(RADIO_CHANNEL_SCIENCE,RADIO_CHANNEL_SERVICE)
 
 /datum/design/beer_cyberimp
 	name = "integrated beer syntizer implantr"
 	desc = "A stripped-down version of engineering cyborg toolset, designed to be installed on subject's arm."
-	id = "integrated beer syntizer"
+	//id = "integrated beer syntizer"
 	build_type = PROTOLATHE | AWAY_LATHE | MECHFAB
 	materials = list(
 		/datum/material/iron = SHEET_MATERIAL_AMOUNT * 1.25,

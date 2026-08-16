@@ -303,19 +303,19 @@
 /datum/design/board/bankmachine_custom
 	name = "Advanced Bank Machine Board"
 	desc = "Allows for the construction of circuit boards used to build a Departamental Bank Machine."
-	id = "custom_bank"
+	//id = "custom_bank"
 	build_path = /obj/item/circuitboard/computer/custom_bankmachine
 	category = list(
 		RND_CATEGORY_COMPUTER + RND_SUBCATEGORY_COMPUTER_COMMAND
 	)
 
 /datum/techweb_node/bankmachine_custom
-	id = TECHWEB_NODE_CUSTOM_BANK
+	//id = TECHWEB_NODE_CUSTOM_BANK
 	display_name = "Advanced Bank Console"
 	description = "Special console that able to connect to departamental bank accounts."
-	prereq_ids = list(TECHWEB_NODE_CONSOLES, TECHWEB_NODE_BLUESPACE_TRAVEL)
-	design_ids = list(
-		"custom_bank",
+	prerequisite_nodes = list(/datum/techweb_node/consoles, /datum/techweb_node/bluespace_travel)
+	unlocked_designs = list(
+		/datum/design/board/bankmachine_custom,
 	)
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_2_POINTS)
 	announce_channels = list(RADIO_CHANNEL_COMMAND)

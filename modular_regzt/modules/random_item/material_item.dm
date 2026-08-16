@@ -48,7 +48,7 @@ GLOBAL_LIST_INIT(pieces_metal_recipes, list(new /datum/stack_recipe("iron sheet"
 
 /datum/design/pieces_metal
 	name = "pieces_metal"
-	id = "pieces_metal"
+	desc = "pieces metal"
 	build_type = AUTOLATHE
 	materials = list(/datum/material/iron = 2)
 	build_path = /obj/item/stack/pieces_metal
@@ -109,7 +109,7 @@ GLOBAL_LIST_INIT(pieces_glass_recipes, list(new /datum/stack_recipe("glass sheet
 
 /datum/design/pieces_glass
 	name = "pieces of glass"
-	id = "pieces of glass"
+	desc = "pieces of glass"
 	build_type = AUTOLATHE
 	materials = list(/datum/material/glass = 2)
 	build_path = /obj/item/stack/pieces_glass
