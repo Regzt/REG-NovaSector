@@ -438,7 +438,7 @@
 "afF" = (
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /obj/effect/mapping_helpers/airlock/access/any/security/maintenance,
@@ -2638,7 +2638,7 @@
 /area/station/security/armory)
 "aHe" = (
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /obj/effect/mapping_helpers/airlock/access/any/service/maintenance,
@@ -4200,7 +4200,7 @@
 	dir = 8
 	},
 /obj/effect/mapping_helpers/airlock/access/any/command/ai_upload,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /turf/open/floor/iron/dark/airless,
@@ -7167,10 +7167,7 @@
 	dir = 9
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "bTu" = (
 /turf/closed/wall/r_wall,
@@ -8394,10 +8391,7 @@
 	pixel_x = 8
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "cjk" = (
 /obj/machinery/door/airlock/maintenance_hatch{
@@ -9634,7 +9628,7 @@
 	name = "Atmos Maintenance"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /turf/open/floor/plating,
 /area/station/hallway/secondary/recreation)
 "cCc" = (
@@ -10203,8 +10197,8 @@
 /area/station/service/kitchen/diner)
 "cIS" = (
 /obj/structure/table,
-/obj/item/mmi,
-/obj/item/mmi{
+/obj/item/brain_processor/organic,
+/obj/item/brain_processor/organic{
 	pixel_y = -5
 	},
 /obj/effect/turf_decal/trimline/purple/filled/line{
@@ -11309,7 +11303,7 @@
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /obj/structure/disposalpipe/segment{
@@ -11493,10 +11487,7 @@
 	pixel_y = 5
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "daw" = (
 /obj/effect/turf_decal/stripes/corner{
@@ -15583,7 +15574,7 @@
 	name = "Aft Port Maintenance"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
 /turf/open/floor/plating,
@@ -15671,7 +15662,7 @@
 /area/station/security/prison/mess)
 "ejr" = (
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /obj/effect/mapping_helpers/airlock/access/any/science/maintenance,
@@ -16354,8 +16345,8 @@
 	},
 /obj/effect/turf_decal/tile/yellow/half,
 /obj/effect/mapping_helpers/airlock/access/all/medical/chemistry,
-/obj/machinery/door/airlock/research/glass{
-	name = "Chemistry Lab"
+/obj/machinery/door/airlock/medical/glass{
+	name = "Pharmacy"
 	},
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
@@ -17265,17 +17256,6 @@
 	},
 /turf/open/floor/iron/checker,
 /area/station/commons/lounge)
-"eFl" = (
-/obj/docking_port/stationary{
-	dir = 4;
-	dwidth = 2;
-	height = 5;
-	name = "labor camp";
-	shuttle_id = "laborcamp_away";
-	width = 9
-	},
-/turf/open/misc/asteroid/snow/icemoon,
-/area/icemoon/surface/outdoors/nospawn)
 "eFm" = (
 /obj/structure/cable,
 /turf/open/floor/iron,
@@ -17698,10 +17678,7 @@
 /obj/structure/flora/ocean/seaweed,
 /obj/structure/flora/bush/sparsegrass,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "eLZ" = (
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
@@ -18795,10 +18772,7 @@
 	dir = 1
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "faZ" = (
 /obj/structure/chair/pew/right{
@@ -22268,7 +22242,7 @@
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/structure/cable,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
 /turf/open/floor/plating,
@@ -23700,10 +23674,7 @@
 /obj/structure/flora/ocean/longseaweed,
 /mob/living/basic/frog,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "gsH" = (
 /obj/structure/reagent_dispensers/watertank/high,
@@ -23762,7 +23733,7 @@
 "gtl" = (
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /obj/effect/mapping_helpers/airlock/access/any/science/maintenance,
@@ -24324,7 +24295,7 @@
 	name = "Aft Maintenance"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /turf/open/floor/plating,
 /area/station/hallway/secondary/recreation)
 "gAw" = (
@@ -24410,10 +24381,7 @@
 	},
 /obj/structure/flora/bush/stalky,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "gBJ" = (
 /turf/open/floor/iron/edge,
@@ -27060,7 +27028,7 @@
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
 /obj/machinery/door/firedoor,
-/obj/machinery/door/airlock/research/glass{
+/obj/machinery/door/airlock/medical/glass{
 	name = "Pharmacy"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/medical/pharmacy,
@@ -27290,7 +27258,7 @@
 	},
 /obj/effect/mapping_helpers/airlock/access/all/command/ai_upload,
 /obj/effect/mapping_helpers/airlock/cyclelink_helper,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/iron/dark/airless,
@@ -29475,7 +29443,7 @@
 	},
 /obj/effect/mapping_helpers/airlock/access/any/command/ai_upload,
 /obj/structure/cable,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /turf/open/floor/iron/dark/airless,
@@ -30895,10 +30863,7 @@
 	pixel_y = 12
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "ilr" = (
 /obj/effect/turf_decal/trimline/green/filled/line,
@@ -33208,7 +33173,7 @@
 /obj/structure/disposalpipe/segment{
 	dir = 4
 	},
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 8
 	},
 /turf/open/floor/plating,
@@ -34772,7 +34737,7 @@
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
@@ -35890,9 +35855,7 @@
 /obj/structure/railing/wooden_fencing{
 	dir = 1
 	},
-/turf/open/floor/iron/stairs{
-	icon_state = "stairs_wood";
-	icon = 'icons/obj/stairs.dmi';
+/turf/open/floor/iron/stairs/wood{
 	dir = 8
 	},
 /area/station/security/courtroom)
@@ -37200,7 +37163,7 @@
 /obj/machinery/door/airlock/maintenance_hatch{
 	name = "Fore Maintenance"
 	},
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
@@ -37240,10 +37203,7 @@
 	pixel_y = 5
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "jTm" = (
 /turf/open/floor/iron/smooth_large,
@@ -37514,7 +37474,7 @@
 /area/station/maintenance/fore/greater)
 "jWG" = (
 /obj/effect/mapping_helpers/airlock/access/all/medical/pharmacy,
-/obj/machinery/door/airlock/research/glass{
+/obj/machinery/door/airlock/medical/glass{
 	name = "Pharmacy"
 	},
 /obj/machinery/door/firedoor,
@@ -37851,7 +37811,7 @@
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/structure/disposalpipe/segment,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/plating,
@@ -39941,7 +39901,7 @@
 /obj/structure/cable,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 8
 	},
 /turf/open/floor/plating,
@@ -40536,7 +40496,7 @@
 "kJR" = (
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/plating,
@@ -41060,7 +41020,7 @@
 /turf/open/floor/iron/large,
 /area/station/cargo/sorting)
 "kQL" = (
-/obj/machinery/door/airlock/research/glass{
+/obj/machinery/door/airlock/medical/glass{
 	name = "Pharmacy"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/medical/pharmacy,
@@ -41226,10 +41186,7 @@
 	},
 /obj/structure/flora/bush/reed/style_2,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "kTt" = (
 /obj/effect/turf_decal/trimline/blue/filled/line{
@@ -41495,7 +41452,7 @@
 "kXj" = (
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /obj/effect/mapping_helpers/airlock/access/any/service/maintenance,
 /turf/open/floor/plating,
 /area/station/maintenance/law)
@@ -42170,10 +42127,7 @@
 	pixel_x = -6
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "lhq" = (
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
@@ -42402,7 +42356,7 @@
 "lkt" = (
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
@@ -42705,7 +42659,7 @@
 	dir = 4
 	},
 /obj/machinery/atmospherics/components/unary/vent_pump/on/layer4{
-	dir = 1
+	dir = 8
 	},
 /obj/effect/turf_decal/siding/dark,
 /turf/open/floor/iron/brick,
@@ -46650,10 +46604,10 @@
 /obj/item/storage/backpack/duffelbag/science/robo/surgery{
 	pixel_y = 7
 	},
-/obj/item/mmi{
+/obj/item/brain_processor/organic{
 	pixel_y = -5
 	},
-/obj/item/mmi{
+/obj/item/brain_processor/organic{
 	pixel_y = -5
 	},
 /obj/effect/turf_decal/trimline/purple/filled/line{
@@ -46905,7 +46859,7 @@
 "mxR" = (
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 8
 	},
 /obj/effect/mapping_helpers/airlock/access/any/service/maintenance,
@@ -49028,10 +48982,7 @@
 	dir = 5
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "net" = (
 /obj/structure/cable,
@@ -52524,10 +52475,7 @@
 "nYE" = (
 /obj/structure/flora/ocean/longseaweed,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "nYL" = (
 /obj/structure/cable,
@@ -53575,20 +53523,14 @@
 "olA" = (
 /obj/structure/flora/ocean/coral,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "olC" = (
 /obj/structure/railing{
 	dir = 4
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "olF" = (
 /obj/effect/turf_decal/tile/red{
@@ -53868,7 +53810,7 @@
 	name = "Fore Maintenance"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/plating,
@@ -54280,9 +54222,7 @@
 /area/station/medical/medbay/central)
 "oxO" = (
 /obj/structure/railing/wooden_fencing,
-/turf/open/floor/iron/stairs{
-	icon_state = "stairs_wood";
-	icon = 'icons/obj/stairs.dmi';
+/turf/open/floor/iron/stairs/wood{
 	dir = 8
 	},
 /area/station/security/courtroom)
@@ -56505,7 +56445,7 @@
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
 /turf/open/floor/plating,
@@ -59605,7 +59545,7 @@
 /obj/machinery/door/airlock/external{
 	name = "MiniSat External Access"
 	},
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /turf/open/floor/iron/dark/airless,
 /area/station/ai/satellite/hallway)
 "pXe" = (
@@ -60280,10 +60220,7 @@
 "qhK" = (
 /obj/structure/flora/bush/sparsegrass/style_3,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "qhR" = (
 /obj/structure/table/wood,
@@ -61506,7 +61443,7 @@
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 8
 	},
 /turf/open/floor/plating,
@@ -61805,7 +61742,7 @@
 "qDq" = (
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 4
 	},
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
@@ -62361,6 +62298,7 @@
 	},
 /obj/effect/mapping_helpers/airlock/access/all/engineering/general,
 /obj/structure/disposalpipe/segment,
+/obj/effect/mapping_helpers/airlock/unres,
 /turf/open/floor/iron/large,
 /area/station/engineering/lobby)
 "qKL" = (
@@ -62711,10 +62649,7 @@
 	},
 /obj/structure/flora/bush/stalky/style_2,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "qPP" = (
 /obj/effect/turf_decal/siding/wood{
@@ -63004,10 +62939,7 @@
 "qUA" = (
 /obj/structure/flora/bush/sparsegrass,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "qUJ" = (
 /obj/machinery/space_heater,
@@ -63589,7 +63521,7 @@
 	name = "Fore Maintenance"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/plating,
@@ -65845,10 +65777,7 @@
 	pixel_x = -6
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "rLY" = (
 /obj/structure/railing/wooden_fence,
@@ -68748,7 +68677,7 @@
 /obj/effect/mapping_helpers/airlock/cyclelink_helper{
 	dir = 1
 	},
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/iron/dark/airless,
@@ -74396,7 +74325,7 @@
 /obj/structure/cable,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
 /obj/machinery/door/airlock/maintenance_hatch,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/plating,
@@ -74580,7 +74509,7 @@
 /obj/structure/cable,
 /obj/machinery/door/airlock/maintenance_hatch,
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /turf/open/floor/plating,
 /area/station/hallway/primary)
 "tVZ" = (
@@ -74631,9 +74560,7 @@
 /turf/open/floor/iron,
 /area/station/hallway/secondary/command)
 "tWy" = (
-/turf/open/floor/iron/stairs{
-	icon_state = "stairs_wood";
-	icon = 'icons/obj/stairs.dmi';
+/turf/open/floor/iron/stairs/wood{
 	dir = 1
 	},
 /area/station/service/theater/abandoned)
@@ -74770,10 +74697,7 @@
 	},
 /obj/structure/flora/bush/stalky/style_random,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "tYj" = (
 /obj/structure/cable,
@@ -74841,10 +74765,7 @@
 	pixel_y = 5
 	},
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "tYL" = (
 /obj/structure/disposalpipe/segment{
@@ -79413,10 +79334,7 @@
 	},
 /obj/structure/flora/bush/stalky/style_3,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "vmy" = (
 /obj/effect/turf_decal/trimline/green/filled/line{
@@ -79895,9 +79813,9 @@
 /obj/structure/table/reinforced,
 /obj/machinery/coffeemaker/impressa,
 /obj/item/reagent_containers/cup/coffeepot,
-/obj/item/seeds/coffee/robusta{
-	pixel_x = -9;
-	pixel_y = 7
+/obj/item/storage/box/coffeepack/robusta{
+	pixel_y = 7;
+	pixel_x = -9
 	},
 /turf/open/floor/iron/white/smooth_edge{
 	dir = 1
@@ -80710,7 +80628,7 @@
 	name = "Fore Maintenance"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/engineering/maintenance,
-/obj/effect/mapping_helpers/airlock/unres{
+/obj/effect/mapping_helpers/airlock/unres/delayed{
 	dir = 1
 	},
 /turf/open/floor/plating,
@@ -81008,6 +80926,7 @@
 /obj/effect/mapping_helpers/airlock/access/all/engineering/general,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
 /obj/machinery/atmospherics/pipe/smart/manifold4w/scrubbers/hidden/layer2,
+/obj/effect/mapping_helpers/airlock/unres,
 /turf/open/floor/iron/large,
 /area/station/engineering/lobby)
 "vHv" = (
@@ -81491,17 +81410,13 @@
 /turf/open/floor/carpet,
 /area/station/commons/dorms)
 "vLV" = (
-/obj/docking_port/stationary{
-	dir = 8;
-	dwidth = 2;
-	height = 5;
-	name = "fore bay 1";
-	roundstart_template = /datum/map_template/shuttle/labour/box;
-	shuttle_id = "laborcamp_home";
-	width = 9
+/obj/structure/disposalpipe/segment{
+	dir = 4
 	},
-/turf/open/misc/asteroid/snow/icemoon,
-/area/icemoon/surface/outdoors/nospawn)
+/obj/effect/turf_decal/siding/dark,
+/obj/machinery/atmospherics/pipe/smart/manifold4w/supply/hidden/layer4,
+/turf/open/floor/iron/brick,
+/area/station/hallway/primary)
 "vMu" = (
 /turf/open/openspace/icemoon,
 /area/icemoon/surface/outdoors/nospawn)
@@ -82122,7 +82037,7 @@
 /obj/machinery/door/airlock/external{
 	name = "MiniSat External Access"
 	},
-/obj/effect/mapping_helpers/airlock/unres,
+/obj/effect/mapping_helpers/airlock/unres/delayed,
 /turf/open/floor/iron/dark/airless,
 /area/station/ai/satellite/hallway)
 "vWG" = (
@@ -83663,10 +83578,7 @@
 	},
 /obj/structure/flora/bush/stalky/style_random,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "wss" = (
 /obj/structure/cable,
@@ -85279,9 +85191,7 @@
 /turf/open/floor/wood/tile,
 /area/station/service/library)
 "wMH" = (
-/turf/open/floor/iron/stairs{
-	icon_state = "stairs_wood";
-	icon = 'icons/obj/stairs.dmi';
+/turf/open/floor/iron/stairs/wood{
 	dir = 8
 	},
 /area/station/security/courtroom)
@@ -85291,9 +85201,7 @@
 /turf/open/floor/plating,
 /area/station/security/checkpoint/customs/fore)
 "wMU" = (
-/turf/open/floor/iron/stairs{
-	icon_state = "stairs_wood";
-	icon = 'icons/obj/stairs.dmi';
+/turf/open/floor/iron/stairs/wood{
 	dir = 1
 	},
 /area/station/service/chapel)
@@ -85531,7 +85439,7 @@
 /turf/open/floor/engine,
 /area/station/engineering/supermatter/room)
 "wPf" = (
-/obj/machinery/door/airlock/research/glass{
+/obj/machinery/door/airlock/medical/glass{
 	name = "Pharmacy"
 	},
 /obj/effect/mapping_helpers/airlock/access/all/medical/pharmacy,
@@ -88037,10 +87945,7 @@
 "xvv" = (
 /obj/structure/railing,
 /obj/effect/spawner/liquids_spawner,
-/turf/open/floor/iron/pool{
-	icon = 'modular_nova/modules/mapping/icons/unique/dungeon.dmi';
-	icon_state = "cobble"
-	},
+/turf/open/floor/iron/pool/dungeon_cobble,
 /area/station/hallway/floor2)
 "xvB" = (
 /obj/structure/cable,
@@ -229030,21 +228935,21 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -229286,23 +229191,23 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -229542,24 +229447,24 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -229798,25 +229703,25 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -230055,25 +229960,25 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -230312,26 +230217,26 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -230568,28 +230473,28 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-eFl
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -230825,28 +230730,28 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -231082,28 +230987,28 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-vLV
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -231339,28 +231244,28 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -231596,27 +231501,27 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -231854,26 +231759,26 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -232112,25 +232017,25 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -232370,21 +232275,21 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -232630,17 +232535,17 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -232888,12 +232793,12 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
-jcZ
+kom
+kom
+kom
+kom
+kom
+kom
 kom
 kom
 kom
@@ -233146,8 +233051,8 @@ kom
 kom
 kom
 kom
-jcZ
-jcZ
+kom
+kom
 kom
 kom
 kom
@@ -255334,7 +255239,7 @@ hxp
 osu
 xhw
 oQe
-tGv
+vLV
 fOf
 bZT
 rRU
