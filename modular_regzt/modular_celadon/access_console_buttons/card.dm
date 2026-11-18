@@ -10,7 +10,7 @@
 			if(!computer || !authenticated_card || !inserted_auth_card || !params_received || params_received.len < 1)
 				return TRUE
 			var/wildcardTab = params["selectedWildcard"]
-			playsound(computer, SFX_TERMINAL_TYPE, 50, FALSE)
+			playsound(computer, /datum/sound_effect/terminal_type, 50, FALSE)
 			for(var/department in params_received) // UI mess here we go
 				var/list/accesses_department = department["accesses"]
 				for(var/access_data in accesses_department)
@@ -29,7 +29,7 @@
 			var/list/params_received = params["accesses"]
 			if(!computer || !authenticated_card || !inserted_auth_card || !params_received || params_received.len < 1)
 				return TRUE
-			playsound(computer, SFX_TERMINAL_TYPE, 50, FALSE)
+			playsound(computer, /datum/sound_effect/terminal_type, 50, FALSE)
 			for(var/department in params_received) // UI mess here we go
 				var/list/accesses_department = department["accesses"]
 				for(var/access_data in accesses_department)

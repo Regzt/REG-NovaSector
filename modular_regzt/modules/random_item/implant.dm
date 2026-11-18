@@ -26,6 +26,8 @@
 	name = "integrated beer syntizer implant"
 	desc = "implant for real dwarf"
 	actions_types = list(/datum/action/item_action/organ_action/toggle/toolkit)
-	items_to_create = list(
+
+/obj/item/organ/cyberimp/arm/toolkit/beer/get_init_items()
+	return list(
 		/obj/item/reagent_containers/borghypo/borgshaker/specific/alcohol/hand,
 	)

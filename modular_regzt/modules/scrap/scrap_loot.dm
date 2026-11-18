@@ -26,7 +26,7 @@ GLOBAL_LIST_INIT(robot_random, list(
 	/obj/item/bodypart/chest/robot = 4,
 	/obj/item/assembly/flash/handheld = 8,
 	/obj/item/stack/cable_coil = 8,
-	/obj/item/mmi/posibrain/circuit = 1,
+	/obj/item/brain_processor/positronic/circuit = 1,
 ))
 
 //листы мусора

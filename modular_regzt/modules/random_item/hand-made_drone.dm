@@ -11,7 +11,7 @@
 	hud_type = /datum/hud/dextrous/drone
 	hud_possible = list(DIAG_STAT_HUD, DIAG_HUD)
 
-	var/obj/item/mmi/mmi = null
+	var/obj/item/brain_processor/mmi = null
 	var/obj/item/card/id/internal_id
 
 /mob/living/basic/drone/handmade/Initialize(mapload)
@@ -45,11 +45,11 @@
 			return TRUE
 
 	// Вставка MMI
-	if(istype(I, /obj/item/mmi))
+	if(istype(I, /obj/item/brain_processor))
 		if(mmi)
 			to_chat(user, span_warning("[src] already has an MMI!"))
 			return TRUE
-		var/obj/item/mmi/new_mmi = I
+		var/obj/item/brain_processor/new_mmi = I
 		if(!new_mmi.brainmob?.mind)
 			to_chat(user, span_warning("[I] has no mind!"))
 			return TRUE

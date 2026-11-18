@@ -40,7 +40,7 @@
 	)
 	departmental_flags = DEPARTMENT_BITFLAG_SCIENCE
 
-/obj/item/mmi/posibrain/ipc
+/obj/item/brain_processor/positronic/ipc
 	name = "compact positronic brain"
 	desc = "A cube of shining metal, it has an IPC serial number engraved on the top. It is usually slotted into the chest of synthetic crewmembers. This one appears to be inactive."
 	icon = 'icons/obj/devices/assemblies.dmi'
@@ -50,10 +50,24 @@
 	begin_activation_message = "<span class='notice'>You carefully locate the manual activation switch and start the compact positronic brain's boot process.</span>"
 	success_message = "<span class='notice'>The compact positronic brain pings, and its lights start flashing. Success!</span>"
 	fail_message = "<span class='notice'>The compact positronic brain buzzes quietly, and the golden lights fade away. Perhaps you could try again?</span>"
-	new_mob_message = "<span class='notice'>The compact positronic brain chimes quietly.</span>"
-	recharge_message = "<span class='warning'>The compact positronic brain isn't ready to activate again yet! Give it some time to recharge.</span>"
 
-/obj/item/mmi/posibrain/ipc/transfer_personality(mob/dead/observer/candidate)
+/obj/item/brain_processor/positronic/ipc/attack_ghost(mob/user)
+	if(QDELETED(brainmob))
+		return
+	if(LAZYACCESS(ckeys_entered, user.ckey))
+		to_chat(user, span_warning("You cannot re-enter [src] a second time!"))
+		return
+	if(is_occupied() || is_banned_from(user.ckey, ROLE_POSIBRAIN) || QDELETED(src) || QDELETED(user))
+		return
+	var/posi_ask = tgui_alert(user, "Become \a [initial(name)]?\nYou will longer be revivable and all past lives will be forgotten!", "Confirm", list("Yes","No"))
+	if(posi_ask != "Yes" || QDELETED(src) || QDELETED(user))
+		return
+	if(is_occupied())
+		INVOKE_ASYNC(GLOBAL_PROC, GLOBAL_PROC_REF(tgui_alert), user, "[src] was possessed before you could confirm.", "Too late", list(pick("Dang", "Aw shucks", "Aww", ":(")))
+		return
+	transfer_personality(user)
+
+/obj/item/brain_processor/positronic/ipc/proc/transfer_personality(mob/dead/observer/candidate)
 	if(candidate)
 		var/obj/item/organ/brain/synth/ipc_brain = new /obj/item/organ/brain/synth(get_turf(src))
 		ipc_brain.brainmob = new /mob/living/brain(ipc_brain)
@@ -66,9 +80,9 @@
 		playsound(src, 'sound/machines/ping.ogg', 15, TRUE)
 		qdel(src)
 
-/obj/item/mmi/posibrain/ipc/update_icon_state()
+/obj/item/brain_processor/positronic/ipc/update_icon_state()
 	. = ..()
-	if(searching)
+	if(is_searching())
 		icon = 'icons/obj/devices/assemblies.dmi'
 		icon_state = "[base_icon_state]-searching"
 		return
@@ -91,7 +105,7 @@
 		/datum/material/gold = SHEET_MATERIAL_AMOUNT * 2,
 		/datum/material/silver = SHEET_MATERIAL_AMOUNT,
 	)
-	build_path = /obj/item/mmi/posibrain/ipc
+	build_path = /obj/item/brain_processor/positronic/ipc
 	category = list(
 		RND_SUBCATEGORY_MECHFAB_ANDROID + RND_SUBCATEGORY_MECHFAB_ANDROID_CHASSIS,
 	)
