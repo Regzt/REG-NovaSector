@@ -9,6 +9,7 @@
 		/datum/design/conveyor_belt,
 		/datum/design/board/mass_driver,
 		/datum/design/board/recycler,
+		/datum/design/board/pile_ripper,
 		/datum/design/board/stacking_machine,
 		/datum/design/board/stacking_unit_console,
 		/datum/design/board/autolathe,

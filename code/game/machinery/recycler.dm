@@ -13,6 +13,7 @@
 	var/safety_mode = FALSE // Temporarily stops machine if it detects a mob
 	var/bloody = FALSE
 	var/amount_produced = 50
+	var/scrap_recycle_chance = 25
 	var/crush_damage = 1000
 	var/eat_victim_items = TRUE
 	var/item_recycle_sound = 'sound/items/tools/welder.ogg'
@@ -54,6 +55,7 @@
 	for(var/datum/stock_part/servo/servo in component_parts)
 		amt_made = 12.5 * servo.tier //% of materials salvaged
 	amount_produced = min(50, amt_made) + 50
+	scrap_recycle_chance = min(100, amt_made * 2)
 	var/datum/component/butchering/butchering = GetComponent(/datum/component/butchering/recycler)
 	butchering.effectiveness = amount_produced
 	butchering.bonus_modifier = amount_produced/5
@@ -249,6 +251,12 @@
 	return FALSE
 
 /obj/machinery/recycler/proc/recycle_item(obj/item/target)
+	if(istype(target, /obj/item/scrap_lump))
+		if(prob(scrap_recycle_chance))
+			new /obj/item/stack/sheet/refined_scrap(drop_location())
+		qdel(target)
+		return TRUE
+
 	if(istype(target, /obj/item/grown/log))
 		var/obj/item/grown/log/wood = target
 		var/seed_modifier = wood.seed ? round(wood.seed.potency / 25) : 0

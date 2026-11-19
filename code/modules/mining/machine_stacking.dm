@@ -166,6 +166,9 @@
 			materials.insert_item(input)
 			return
 
+	// Refined scrap releases in smaller batches, like TauCeti's scrap stacker.
+	var/batch_amount = istype(input, /obj/item/stack/sheet/refined_scrap) ? 20 : stack_amt
+
 	// No silo attached process to internal storage
 	var/key = input.merge_type
 	var/obj/item/stack/storage = stack_list[key]
@@ -174,7 +177,7 @@
 	storage.amount += input.amount //Stack the sheets
 	qdel(input)
 
-	while(storage.amount >= stack_amt) //Get rid of excessive stackage
-		var/obj/item/stack/out = new input.type(null, stack_amt)
+	while(storage.amount >= batch_amount) //Get rid of excessive stackage
+		var/obj/item/stack/out = new input.type(null, batch_amount)
 		unload_mineral(out)
-		storage.amount -= stack_amt
+		storage.amount -= batch_amount

@@ -59,6 +59,7 @@
 		/datum/design/board/electrolyzer,
 		/datum/design/board/pipe_scrubber,
 		/datum/design/board/pacman,
+		/datum/design/board/scrapman,
 		/datum/design/mech_generator,
 		/datum/design/plasmacutter,
 		/datum/design/diode_disk_incendiary,
