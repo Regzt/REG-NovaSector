@@ -262,3 +262,8 @@ define_sanity_output.txt
 # Running OpenDream locally
 tgstation.json
 rust_g64.dll
+
+#мои папки
+/_custom
+/BlueMoon-Station
+/SierraBay12-dev-sierra
