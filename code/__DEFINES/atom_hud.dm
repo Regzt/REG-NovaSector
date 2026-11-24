@@ -48,6 +48,8 @@
 #define MALF_APC_HUD "22"
 /// Blood volume bar, visible to blood worms
 #define BLOOD_HUD "23"
+/// Legacy integrated electronics assembly health bar
+#define DIAG_CIRCUIT_HUD "24"
 
 // NOVA EDIT ADDITION BEGIN - gun permits and DNR
 /// ammo of guns

@@ -1,0 +1,209 @@
+import { classes } from 'tgui-core/react';
+
+import { useBackend } from '../../backend';
+import { Box, Button, Flex, Stack } from 'tgui-core/components';
+import { connectedToRefList } from './byondPayload';
+import { DATATYPE_DISPLAY_HANDLERS, FUNDAMENTAL_DATA_TYPES } from './FundamentalTypes';
+import { formatPortLiveValue } from './portValueFormat';
+
+export const DisplayName = (props) => {
+  const { act, data } = useBackend();
+  const { port, isOutput, componentId, portIndex, className, ...rest } = props;
+  const isIeCircuit = !!data.ie_circuit;
+
+  const fundamentalType = FUNDAMENTAL_DATA_TYPES[port.type] ? port.type : 'any';
+  const InputComponent = FUNDAMENTAL_DATA_TYPES[fundamentalType];
+  const TypeDisplayHandler = DATATYPE_DISPLAY_HANDLERS[fundamentalType];
+
+  const connectionRefs = connectedToRefList(port.connected_to);
+
+  const hasInput = !isOutput && !!InputComponent;
+  const isSignal = fundamentalType === 'signal';
+  const isOption = fundamentalType === 'option';
+  // IE: пины данных правятся через нативное меню, а не инлайн-виджетами.
+  const nativeEditableInput = !isOutput && isIeCircuit && !isSignal && !isOption;
+
+  const displayType = port.pin_type_label
+    || (TypeDisplayHandler ? TypeDisplayHandler(port) : fundamentalType);
+  // Значение показываем всегда: выходы, подключённые входы и IE-входы данных.
+  const showLive = isOutput || !!connectionRefs.length || nativeEditableInput;
+  const liveText = showLive
+    ? formatPortLiveValue(port.current_data, fundamentalType)
+    : null;
+
+  const pdata = port.current_data;
+  const liveInspectable = isIeCircuit && (
+    fundamentalType === 'list'
+    || (pdata !== null && pdata !== undefined && typeof pdata === 'object')
+  );
+
+  const openPortInspect = () => {
+    if (!isIeCircuit) {
+      return;
+    }
+    if (fundamentalType === 'list') {
+      act('ie_pin_editor_open', {
+        component_id: componentId,
+        port_id: portIndex,
+        is_output: !!isOutput,
+      });
+    }
+    else {
+      act('ie_open_data_inspector', {
+        component_id: componentId,
+        port_id: portIndex,
+        is_output: !!isOutput,
+      });
+    }
+  };
+
+  // Открыть нативный редактор значения для обычного (не списка и не импульса) пина.
+  const openNativeEditor = () => act('ie_pin_editor_open', {
+    component_id: componentId,
+    port_id: portIndex,
+    is_output: !!isOutput,
+  });
+
+  return (
+    <Box
+      {...rest}
+      className={classes([className, 'IntegratedCircuit__portDisplayName'])}>
+      <Flex direction="column">
+        <Flex.Item>
+          {(nativeEditableInput && (
+            <Flex align="center" direction="row">
+              <Flex.Item>
+                <Button
+                  compact
+                  color="transparent"
+                  icon="expand"
+                  tooltip="Открыть нативный редактор значения"
+                  onClick={openNativeEditor}
+                />
+              </Flex.Item>
+              <Flex.Item grow>
+                <Box color="white">{port.name}</Box>
+              </Flex.Item>
+            </Flex>
+          ))
+            || (hasInput && (
+            <Stack align="center" wrap>
+              <Stack.Item grow>
+                <InputComponent
+                  act={act}
+                  componentId={componentId}
+                  portId={portIndex}
+                  isOutput={isOutput}
+                  ieCircuit={isIeCircuit}
+                  setValue={(val, extraParams) =>
+                    act('set_component_input', {
+                      component_id: componentId,
+                      port_id: portIndex,
+                      input: val,
+                      ...extraParams,
+                    })}
+                  color={port.color}
+                  name={port.name}
+                  value={port.current_data}
+                  extraData={port.datatype_data}
+                />
+              </Stack.Item>
+            </Stack>
+          ))
+            || (isOutput && (
+              <Flex align="center" direction="row">
+                <Flex.Item>
+                  <Button
+                    compact
+                    color="transparent"
+                    icon="comment-dots"
+                    tooltip="Показать значение (balloon)"
+                    onClick={() =>
+                      act('get_component_value', {
+                        component_id: componentId,
+                        port_id: portIndex,
+                      })} />
+                </Flex.Item>
+                {(isIeCircuit && fundamentalType === 'list') && (
+                  <Flex.Item>
+                    <Button
+                      compact
+                      color="transparent"
+                      icon="list-ul"
+                      tooltip="Редактор / просмотр списка"
+                      onClick={openPortInspect}
+                    />
+                  </Flex.Item>
+                )}
+                {isIeCircuit && fundamentalType !== 'signal'
+                  && fundamentalType !== 'option' && fundamentalType !== 'list' && (
+                    <Flex.Item>
+                      <Button
+                        compact
+                        color="transparent"
+                        icon="expand"
+                        tooltip="Открыть нативный редактор значения"
+                        onClick={openNativeEditor}
+                      />
+                    </Flex.Item>
+                  )}
+                <Flex.Item grow>
+                  <Box color="white">{port.name}</Box>
+                </Flex.Item>
+              </Flex>
+            ))
+            || port.name}
+        </Flex.Item>
+        <Flex.Item>
+          <Box
+            fontSize={0.75}
+            opacity={0.25}
+            textAlign={isOutput ? 'right' : 'left'}>
+            {displayType || 'unknown'}
+          </Box>
+        </Flex.Item>
+        {connectionRefs.length > 1 && (
+          <Flex.Item>
+            <Box
+              fontSize={0.64}
+              opacity={0.4}
+              mt={0.12}
+              textAlign={isOutput ? 'right' : 'left'}
+              className="PortConnectionOrder__hint">
+              Порядок связей — наведи на круг порта
+            </Box>
+          </Flex.Item>
+        )}
+        {!!showLive && (
+          <Flex.Item>
+            <Box
+              className="PortLiveValue__label"
+              textAlign={isOutput ? 'right' : 'left'}>
+              значение
+            </Box>
+            {liveInspectable ? (
+              <Box
+                className="PortLiveValue PortLiveValue--inspect"
+                textAlign={isOutput ? 'right' : 'left'}
+                title={
+                  fundamentalType === 'list'
+                    ? `${liveText} — открыть список`
+                    : `${liveText} — открыть полные данные`
+                }
+                onClick={openPortInspect}>
+                {liveText}
+              </Box>
+            ) : (
+              <Box
+                className="PortLiveValue"
+                textAlign={isOutput ? 'right' : 'left'}
+                title={liveText}>
+                {liveText}
+              </Box>
+            )}
+          </Flex.Item>
+        )}
+      </Flex>
+    </Box>
+  );
+};

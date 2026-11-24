@@ -1,0 +1,1033 @@
+#define IC_MAX_SIZE_BASE		25
+#define IC_COMPLEXITY_BASE		75
+
+/obj/item/electronic_assembly
+	armor_type = /datum/armor/electronic_assembly
+	name = "electronic assembly"
+	obj_flags = CAN_BE_HIT | UNIQUE_RENAME
+	desc = "It's a case, for building small electronics with."
+	w_class = WEIGHT_CLASS_SMALL
+	icon = 'modular_regzt/modules/integrated_circuits_old/icons/obj/assemblies/electronic_setups.dmi'
+	icon_state = "setup_small"
+	item_flags = NOBLUDGEON
+	custom_materials = null		// To be filled later
+	datum_flags = DF_USE_TAG
+	var/list/assembly_components = list()
+	var/list/ckeys_allowed_to_scan = list() // Players who built the circuit can scan it as a ghost.
+	var/max_components = IC_MAX_SIZE_BASE
+	var/max_complexity = IC_COMPLEXITY_BASE
+	var/opened = TRUE
+	var/obj/item/stock_parts/power_store/cell/battery // Internal cell which most circuits need to work.
+	var/cell_type = /obj/item/stock_parts/power_store/cell
+	var/can_charge = TRUE //Can it be charged in a recharger?
+	var/can_fire_equipped = FALSE //Can it fire/throw weapons when the assembly is being held?
+	var/charge_sections = 4
+	var/charge_tick = FALSE
+	var/charge_delay = 4
+	var/use_cyborg_cell = TRUE
+	var/ext_next_use = 0
+	var/atom/collw
+	var/obj/item/card/id/access_card
+	var/allowed_circuit_action_flags = IC_ACTION_COMBAT | IC_ACTION_LONG_RANGE //which circuit flags are allowed
+	var/combat_circuits = 0 //number of combat cicuits in the assembly, used for diagnostic hud
+	var/long_range_circuits = 0 //number of long range cicuits in the assembly, used for diagnostic hud
+	var/prefered_hud_icon = "hudstat"		// Used by the AR circuit to change the hud icon.
+	var/creator // circuit creator if any
+	var/static/next_assembly_id = 0
+	var/sealed = FALSE
+
+	/// TGUI IntegratedCircuit canvas pan
+	var/ie_tgui_screen_x = 0
+	var/ie_tgui_screen_y = 0
+	var/datum/weakref/ie_gui_examined_circuit
+	var/ie_gui_examined_x = 0
+	var/ie_gui_examined_y = 0
+	/// TGUI: очередь «живых» импульсов для подсветки проводов/нод; храним все недавние, чтобы
+/// троттлинг не терял промежуточные активации (порядок = порядок активации).
+	/// entry: list("out"=REF, "in"=REF, "chip_in"=weakref, "chip_out"=weakref, "until"=world.time)
+	var/list/ie_tgui_pulses = list()
+	/// TGUI: троттлинг форс-обновлений окна при непрерывной работе схемы (иначе каждый push_data → полная ресериализация сотен компонентов).
+	var/ie_tgui_last_ui_push = 0
+	/// TGUI: пины, для которых открыт нативный редактор значений (список/текст) — REF(io) активен.
+	var/datum/integrated_io/ie_gui_editor_io
+	var/ie_gui_editor_is_output = FALSE
+	/// Last coarse diagnostic HUD state from compute_diagnostic_hud_process_key; skips redundant health/cell updates in process().
+	var/last_diag_process_key = ""
+	/// Cached "[icon]-[icon_state]-[dir]" so sync_diagnostic_hud_offsets avoids allocating /icon every diag call.
+	var/diag_hud_offset_key = ""
+
+	hud_possible = list(DIAG_STAT_HUD, DIAG_BATT_HUD, DIAG_TRACK_HUD, DIAG_CIRCUIT_HUD) //diagnostic hud overlays
+	max_integrity = 50
+	pass_flags = 0
+	anchored = FALSE
+	var/can_anchor = TRUE
+	var/detail_color = COLOR_ASSEMBLY_BLACK
+	var/list/color_whitelist = list( //This is just for checking that hacked colors aren't in the save data.
+		COLOR_ASSEMBLY_BLACK,
+		COLOR_FLOORTILE_GRAY,
+		COLOR_ASSEMBLY_BGRAY,
+		COLOR_ASSEMBLY_WHITE,
+		COLOR_ASSEMBLY_RED,
+		COLOR_ASSEMBLY_ORANGE,
+		COLOR_ASSEMBLY_BEIGE,
+		COLOR_ASSEMBLY_BROWN,
+		COLOR_ASSEMBLY_GOLD,
+		COLOR_ASSEMBLY_YELLOW,
+		COLOR_ASSEMBLY_GURKHA,
+		COLOR_ASSEMBLY_LGREEN,
+		COLOR_ASSEMBLY_GREEN,
+		COLOR_ASSEMBLY_LBLUE,
+		COLOR_ASSEMBLY_BLUE,
+		COLOR_ASSEMBLY_PURPLE
+		)
+
+/obj/item/electronic_assembly/New()
+	..()
+	src.max_components = round(max_components)
+	src.max_complexity = round(max_complexity)
+
+/obj/item/electronic_assembly/GenerateTag()
+    tag = "assembly_[next_assembly_id++]"
+
+/obj/item/electronic_assembly/examine(mob/user)
+	. = ..()
+	if(can_anchor)
+		. += "<span class='notice'>The anchoring bolts [anchored ? "are" : "can be"] <b>wrenched</b> in place and the maintenance panel [opened ? "can be" : "is"] <b>screwed</b> in place.</span>"
+	else
+		. += "<span class='notice'>The maintenance panel [opened ? "can be" : "is"] <b>screwed</b> in place.</span>"
+
+	if((isobserver(user) && ckeys_allowed_to_scan[user.ckey]) || isAdminGhostAI(user))
+		. += "You can <a href='?src=[REF(src)];ghostscan=1'>scan</a> this circuit."
+
+	for(var/obj/item/integrated_circuit_old/I in assembly_components)
+		var/examine_data = I.external_examine(user)
+		if(examine_data)
+			. += examine_data
+	if(opened)
+		interact(user)
+
+/obj/item/electronic_assembly/proc/check_interactivity(mob/user)
+	if(!istype(user, /mob))
+		return
+	return user.can_interact_with(src)
+
+/obj/item/electronic_assembly/Bump(atom/AM)
+	collw = AM
+	.=..()
+	if((istype(collw, /obj/machinery/door/airlock) ||  istype(collw, /obj/machinery/door/window)) && (!isnull(access_card)))
+		var/obj/machinery/door/D = collw
+		if(D.check_access(access_card))
+			D.open()
+
+/obj/item/electronic_assembly/Initialize(mapload)
+	LAZYSET(custom_materials, /datum/material/iron, round((max_complexity + max_components) * 0.25) * SScircuit.cost_multiplier)
+	.=..()
+	START_PROCESSING(SScircuit, src)
+
+	//sets up diagnostic hud view
+	prepare_huds()
+	for(var/datum/atom_hud/data/diagnostic/diag_hud in GLOB.all_huds)
+		diag_hud.add_atom_to_hud(src)
+	diag_hud_set_circuithealth()
+	diag_hud_set_circuitcell()
+	diag_hud_set_circuitstat()
+	diag_hud_set_circuittracking()
+	last_diag_process_key = compute_diagnostic_hud_process_key()
+
+	access_card = new /obj/item/card/id(src)
+
+/obj/item/electronic_assembly/Destroy()
+	STOP_PROCESSING(SScircuit, src)
+	for(var/datum/atom_hud/data/diagnostic/diag_hud in GLOB.all_huds)
+		diag_hud.remove_atom_from_hud(src)
+	// Kill light datum/lighting work before qdel'ing many contents; clear wiring from chips first pass.
+	set_light(0)
+	for(var/obj/item/integrated_circuit_old/ic as anything in assembly_components.Copy())
+		qdel(ic)
+	assembly_components.Cut()
+	QDEL_NULL(battery)
+	QDEL_NULL(access_card)
+	return ..()
+
+/obj/item/electronic_assembly/process()
+	handle_idle_power()
+	check_pulling()
+
+	// Diagnostic HUD: only when turf visibility or coarse health/battery buckets change (see compute_diagnostic_hud_process_key).
+	var/next_diag_key = compute_diagnostic_hud_process_key()
+	if(next_diag_key != last_diag_process_key)
+		last_diag_process_key = next_diag_key
+		diag_hud_set_circuithealth()
+		diag_hud_set_circuitcell()
+
+/// Coarse key for whether health/cell diagnostic overlays need a refresh this SS tick.
+/obj/item/electronic_assembly/proc/compute_diagnostic_hud_process_key()
+	if(!isturf(loc))
+		return "off"
+	var/mh = max(max_integrity, 1)
+	var/h = RoundDiagBar(atom_integrity / mh)
+	if(!battery)
+		return "[h]-nobatt"
+	var/mc = max(battery.maxcharge, 1)
+	return "[h]-[RoundDiagBar(battery.charge / mc)]"
+
+/// Sets pixel_y on diagnostic HUD holders when assembly icon appearance changes; avoids per-call /icon allocations in diag_hud_set_circuit* procs.
+/obj/item/electronic_assembly/proc/sync_diagnostic_hud_offsets()
+	if(!hud_list)
+		return
+	var/key = "[icon]-[icon_state]-[dir]"
+	if(key == diag_hud_offset_key)
+		return
+	diag_hud_offset_key = key
+	if(!icon)
+		return
+	var/icon/I = icon(icon, icon_state, dir)
+	var/offset = I.Height() - world.icon_size
+	for(var/hud_id in list(DIAG_CIRCUIT_HUD, DIAG_BATT_HUD, DIAG_STAT_HUD, DIAG_TRACK_HUD))
+		var/image/holder = hud_list[hud_id]
+		if(istype(holder))
+			holder.pixel_y = offset
+
+/// Updates the diagnostic health overlay for this assembly.
+/obj/item/electronic_assembly/proc/diag_hud_set_circuithealth(hide = FALSE)
+	if(!icon)
+		return
+	sync_diagnostic_hud_offsets()
+	if(!isturf(loc) || hide)
+		set_hud_image_inactive(DIAG_CIRCUIT_HUD)
+		return
+	set_hud_image_state(DIAG_CIRCUIT_HUD, hud_state = "huddiag[RoundDiagBar(atom_integrity / max(max_integrity, 1))]")
+	set_hud_image_active(DIAG_CIRCUIT_HUD)
+
+/// Updates the diagnostic battery overlay for this assembly.
+/obj/item/electronic_assembly/proc/diag_hud_set_circuitcell(hide = FALSE)
+	if(!icon)
+		return
+	sync_diagnostic_hud_offsets()
+	if(!isturf(loc) || hide)
+		set_hud_image_inactive(DIAG_BATT_HUD)
+		return
+	if(battery)
+		set_hud_image_state(DIAG_BATT_HUD, hud_state = "hudbatt[RoundDiagBar(battery.charge / max(battery.maxcharge, 1))]")
+	else
+		set_hud_image_state(DIAG_BATT_HUD, hud_state = "hudnobatt")
+	set_hud_image_active(DIAG_BATT_HUD)
+
+/// Updates the diagnostic on/off/dangerous overlay for this assembly.
+/obj/item/electronic_assembly/proc/diag_hud_set_circuitstat(hide = FALSE) //On, On and dangerous, or Off
+	if(!icon)
+		return
+	sync_diagnostic_hud_offsets()
+	if(!isturf(loc) || hide)
+		set_hud_image_inactive(DIAG_STAT_HUD)
+		return
+	if(!battery || battery.charge == 0)
+		set_hud_image_state(DIAG_STAT_HUD, hud_state = "hudoffline")
+	else if(combat_circuits) //has a circuit that can harm people
+		set_hud_image_state(DIAG_STAT_HUD, hud_state = "[prefered_hud_icon]-red")
+	else //Bot is on and not dangerous
+		set_hud_image_state(DIAG_STAT_HUD, hud_state = prefered_hud_icon)
+	set_hud_image_active(DIAG_STAT_HUD)
+
+/// Updates the diagnostic tracking overlay for this assembly.
+/obj/item/electronic_assembly/proc/diag_hud_set_circuittracking(hide = FALSE)
+	if(!icon)
+		return
+	sync_diagnostic_hud_offsets()
+	if(!isturf(loc) || hide || !long_range_circuits)
+		set_hud_image_inactive(DIAG_TRACK_HUD)
+		return
+	set_hud_image_state(DIAG_TRACK_HUD, hud_state = "hudtracking")
+	set_hud_image_active(DIAG_TRACK_HUD)
+
+/obj/item/electronic_assembly/proc/handle_idle_power()
+
+	// First we generate power.
+	for(var/obj/item/integrated_circuit_old/passive/power/P in assembly_components)
+		P.make_energy()
+
+	// Now spend it.
+	for(var/obj/item/integrated_circuit_old/I in assembly_components)
+		if(I.power_draw_idle)
+			if(!draw_power(I.power_draw_idle))
+				I.power_fail()
+
+/obj/item/electronic_assembly/interact(mob/user, circuit)
+	ui_interact(user, circuit)
+
+/obj/item/electronic_assembly/Topic(href, href_list)
+	if(..())
+		return TRUE
+
+	if(href_list["ghostscan"])
+		if((isobserver(usr) && ckeys_allowed_to_scan[usr.ckey]) || isAdminGhostAI(usr))
+			if(assembly_components.len)
+				// html_encode обязателен, см. тот же случай в analyzer.dm: без него символы
+				// < > & из подписей компонентов браузер съедает как разметку, и скопированный
+				// JSON уже не разбирается принтером.
+				var/saved = "On circuit printers with cloning enabled, you may use the code below to clone the circuit:<br><br><code style='word-break:break-all;white-space:pre-wrap'>[html_encode(SScircuit.save_electronic_assembly(src))]</code>"
+				var/datum/browser/popup = new(usr, "circuit_scan", "Circuit Scan", 500, 600)
+				popup.set_content(saved)
+				popup.open()
+			else
+				to_chat(usr, "<span class='warning'>The circuit is empty!</span>")
+		return
+
+	if(!check_interactivity(usr))
+		return
+
+	if(href_list["rename"])
+		rename(usr)
+
+	if(href_list["remove_cell"])
+		if(!battery)
+			to_chat(usr, "<span class='warning'>There's no power cell to remove from \the [src].</span>")
+		else
+			battery.forceMove(drop_location())
+			playsound(src, 'sound/items/tools/crowbar.ogg', 50, 1)
+			to_chat(usr, "<span class='notice'>You pull \the [battery] out of \the [src]'s power supplier.</span>")
+			battery = null
+			diag_hud_set_circuitstat() //update diagnostic hud
+			SStgui.update_uis(src)
+
+	var/obj/item/integrated_circuit_old/component
+
+	if(href_list["component"])
+		component = locate(href_list["component"]) in assembly_components
+
+		if(!component)
+			return
+
+
+		if(href_list["scan"])
+			var/obj/held_item = usr.get_active_held_item()
+			if(istype(held_item, /obj/item/integrated_electronics/debugger))
+				var/obj/item/integrated_electronics/debugger/D = held_item
+				if(D.accepting_refs)
+					D.scan_ref(component, usr)
+				else
+					to_chat(usr, "<span class='warning'>The debugger's 'ref scanner' needs to be on.</span>")
+			else
+				to_chat(usr, "<span class='warning'>You need a debugger set to 'ref' mode to do that.</span>")
+
+		// Builtin components are not supposed to be removed or rearranged
+		if(!component.removable)
+			return
+
+		add_allowed_scanner(usr.ckey)
+
+		// Find the position of a first removable component
+		var/first_removable_pos = 0
+		for(var/i in assembly_components)
+			first_removable_pos++
+			var/obj/item/integrated_circuit_old/temp_component = i
+			if(temp_component.removable)
+				break
+
+		if(href_list["remove"])
+			if(try_remove_component(component, usr))
+				component = null
+
+		if(href_list["rename_component"])
+			component.rename_component(usr)
+			if(component.assembly)
+				component.assembly.add_allowed_scanner(usr.ckey)
+
+		if(href_list["interact"])
+			var/obj/item/I = usr.get_active_held_item()
+			if(istype(I))
+				I.melee_attack_chain(usr, component)
+			else
+				component.attack_self(usr)
+
+		// Adjust the position
+		if(href_list["change_pos"])
+			var/new_pos = max(input(usr,"Write the new number","New position") as num,1)
+
+			if(new_pos > assembly_components.len)
+				new_pos = assembly_components.len
+
+			if(new_pos < first_removable_pos)
+				new_pos = first_removable_pos
+
+			assembly_components.Remove(component)
+			assembly_components.Insert(new_pos, component)
+
+	interact(usr, component) // To refresh the UI.
+
+/obj/item/electronic_assembly/pickup(mob/living/user)
+	. = ..()
+	//update diagnostic hud when picked up, true is used to force the hud to be hidden
+	diag_hud_set_circuithealth(TRUE)
+	diag_hud_set_circuitcell(TRUE)
+	diag_hud_set_circuitstat(TRUE)
+	diag_hud_set_circuittracking(TRUE)
+	last_diag_process_key = compute_diagnostic_hud_process_key()
+
+/obj/item/electronic_assembly/dropped(mob/user)
+	. = ..()
+	//update diagnostic hud when dropped
+	diag_hud_set_circuithealth()
+	diag_hud_set_circuitcell()
+	diag_hud_set_circuitstat()
+	diag_hud_set_circuittracking()
+	last_diag_process_key = compute_diagnostic_hud_process_key()
+
+/obj/item/electronic_assembly/proc/rename()
+	var/mob/M = usr
+	if(!check_interactivity(M))
+		return
+
+	var/input = reject_bad_name(input("What do you want to name this?", "Rename", src.name) as null|text, TRUE)
+	if(!check_interactivity(M))
+		return
+	if(src && input)
+		to_chat(M, "<span class='notice'>The machine now has a label reading '[input]'.</span>")
+		name = input
+
+/obj/item/electronic_assembly/proc/add_allowed_scanner(ckey)
+	ckeys_allowed_to_scan[ckey] = TRUE
+
+/obj/item/electronic_assembly/proc/can_move()
+	return FALSE
+
+/obj/item/electronic_assembly/update_icon()
+	if(opened)
+		icon_state = initial(icon_state) + "-open"
+	else
+		icon_state = initial(icon_state)
+	diag_hud_offset_key = ""
+	cut_overlays()
+	if(detail_color == COLOR_ASSEMBLY_BLACK) //Black colored overlay looks almost but not exactly like the base sprite, so just cut the overlay and avoid it looking kinda off.
+		return
+	var/mutable_appearance/detail_overlay = mutable_appearance('modular_regzt/modules/integrated_circuits_old/icons/obj/assemblies/electronic_setups.dmi', "[icon_state]-color")
+	detail_overlay.color = detail_color
+	add_overlay(detail_overlay)
+
+/obj/item/electronic_assembly/proc/return_total_complexity()
+	var/returnvalue = 0
+	for(var/obj/item/integrated_circuit_old/part in assembly_components)
+		returnvalue += part.complexity
+	return(returnvalue)
+
+/obj/item/electronic_assembly/proc/return_total_size()
+	var/returnvalue = 0
+	for(var/obj/item/integrated_circuit_old/part in assembly_components)
+		returnvalue += part.size
+	return(returnvalue)
+
+// Returns true if the circuit made it inside.
+/obj/item/electronic_assembly/proc/try_add_component(obj/item/integrated_circuit_old/IC, mob/user)
+	if(!opened)
+		to_chat(user, "<span class='warning'>\The [src]'s hatch is closed, you can't put anything inside.</span>")
+		return FALSE
+
+	if(IC.w_class > w_class)
+		to_chat(user, "<span class='warning'>\The [IC] is way too big to fit into \the [src].</span>")
+		return FALSE
+	if(IC.limit_per_assembly > 0)	// limit_per_assembly is not null and > 0
+		var/already = 0
+		for(var/obj/item/integrated_circuit_old/C in assembly_components)	// checking all circuits already present
+			if(C.type == IC.type)
+				already++
+				if(already >= IC.limit_per_assembly)
+					to_chat(user, "<span class='warning'>Вы не можете вставить больше [IC.limit_per_assembly] таких плат в один корпус.</span>")
+					return FALSE
+	var/total_part_size = return_total_size()
+	var/total_complexity = return_total_complexity()
+
+	if((total_part_size + IC.size) > max_components)
+		to_chat(user, "<span class='warning'>You can't seem to add the '[IC]', as there's insufficient space.</span>")
+		return FALSE
+	if((total_complexity + IC.complexity) > max_complexity)
+		to_chat(user, "<span class='warning'>You can't seem to add the '[IC]', since this setup's too complicated for the case.</span>")
+		return FALSE
+	if((allowed_circuit_action_flags & IC.action_flags) != IC.action_flags)
+		to_chat(user, "<span class='warning'>You can't seem to add the '[IC]', since the case doesn't support the circuit type.</span>")
+		return FALSE
+
+	if(!user.transferItemToLoc(IC, src))
+		return FALSE
+
+	to_chat(user, "<span class='notice'>You slide [IC] inside [src].</span>")
+	playsound(src, 'sound/items/Deconstruct.ogg', 50, 1)
+	add_allowed_scanner(user.ckey)
+	investigate_log("had [IC]([IC.type]) inserted by [key_name(user)].", INVESTIGATE_CIRCUIT)
+
+	add_component(IC)
+	return TRUE
+
+
+// Actually puts the circuit inside, doesn't perform any checks.
+/obj/item/electronic_assembly/proc/add_component(obj/item/integrated_circuit_old/component)
+	component.assembly = src
+	component.forceMove(get_object())
+	assembly_components |= component
+
+	//increment numbers for diagnostic hud
+	if(component.action_flags & IC_ACTION_COMBAT)
+		combat_circuits += 1;
+	if(component.action_flags & IC_ACTION_LONG_RANGE)
+		long_range_circuits += 1;
+
+	//diagnostic hud update
+	diag_hud_set_circuitstat()
+	diag_hud_set_circuittracking()
+	SStgui.update_uis(src)
+
+
+/obj/item/electronic_assembly/proc/try_remove_component(obj/item/integrated_circuit_old/IC, mob/user, silent)
+	if(!opened)
+		if(!silent)
+			to_chat(user, "<span class='warning'>[src]'s hatch is closed, so you can't fiddle with the internal components.</span>")
+		return FALSE
+
+	if(!IC.removable)
+		if(!silent)
+			to_chat(user, "<span class='warning'>[src] is permanently attached to the case.</span>")
+		return FALSE
+
+	remove_component(IC)
+	if(!silent)
+		to_chat(user, "<span class='notice'>You pop \the [IC] out of the case, and slide it out.</span>")
+		playsound(src, 'sound/items/tools/crowbar.ogg', 50, 1)
+		user.put_in_hands(IC)
+	add_allowed_scanner(user.ckey)
+	investigate_log("had [IC]([IC.type]) removed by [key_name(user)].", INVESTIGATE_CIRCUIT)
+
+	return TRUE
+
+// Actually removes the component, doesn't perform any checks.
+/obj/item/electronic_assembly/proc/remove_component(obj/item/integrated_circuit_old/component)
+	component.disconnect_all()
+	component.forceMove(drop_location())
+	component.assembly = null
+
+	assembly_components -= component
+
+	//decrement numbers for diagnostic hud
+	if(component.action_flags & IC_ACTION_COMBAT)
+		combat_circuits -= 1;
+	if(component.action_flags & IC_ACTION_LONG_RANGE)
+		long_range_circuits -= 1;
+
+	//diagnostic hud update
+	diag_hud_set_circuitstat()
+	diag_hud_set_circuittracking()
+	SStgui.update_uis(src)
+
+
+/obj/item/electronic_assembly/afterattack(atom/target, mob/user, list/modifiers, list/attack_modifiers)
+	. = ..()
+	var/proximity = user.Adjacent(target)
+	for(var/obj/item/integrated_circuit_old/input/S in assembly_components)
+		if(S.sense(target,user,proximity))
+			visible_message("<span class='notice'> [user] waves [src] around [target].</span>")
+
+
+/obj/item/electronic_assembly/screwdriver_act(mob/living/user, obj/item/I)
+	if(sealed)
+		to_chat(user,"<span class='notice'>The assembly is sealed. Any attempt to force it open would break it.</span>")
+		return FALSE
+	if(..())
+		return TRUE
+	I.play_tool_sound(src)
+	opened = !opened
+	to_chat(user, "<span class='notice'>You [opened ? "open" : "close"] the maintenance hatch of [src].</span>")
+	update_icon()
+	return TRUE
+
+/obj/item/electronic_assembly/welder_act(mob/living/user, obj/item/I)
+	var/type_to_use
+
+	if(!sealed)
+		type_to_use = input("What would you like to do?","[src] type setting") as null|anything in list("repair", "seal")
+	else
+		type_to_use = input("What would you like to do?","[src] type setting") as null|anything in list("repair", "unseal")
+
+	switch(type_to_use)
+		if("repair")
+			if(atom_integrity < max_integrity)
+				atom_integrity = min(atom_integrity + 20,max_integrity)
+				to_chat(user,"<span class='notice'>You fix the dents and scratches of the assembly.</span>")
+				to_chat(user, "<span class='notice'>Integrity: [atom_integrity] / [max_integrity]</span>")
+				return TRUE
+
+			else
+				to_chat(user,"<span class='notice'>The assembly is already in impeccable condition.</span>")
+				return FALSE
+
+		if("seal")
+			if(!opened)
+				sealed = TRUE
+				if(I.use_tool(src, user, 50, volume=100, amount=3))
+					to_chat(user,"<span class='notice'>You seal the assembly, making it impossible to be opened.</span>")
+					return TRUE
+
+			else
+				to_chat(user,"<span class='notice'>You need to close the assembly first before sealing it indefinitely!</span>")
+				return FALSE
+
+		if("unseal")
+			to_chat(user,"<span class='notice'>You start unsealing the assembly carefully...</span>")
+			if(I.use_tool(src, user, 50, volume=250, amount=3))
+				for(var/obj/item/integrated_circuit_old/IC in assembly_components)
+					if(prob(50))
+						IC.disconnect_all()
+
+				to_chat(user,"<span class='notice'>You unsealed the assembly.</span>")
+				sealed = FALSE
+				return TRUE
+
+/obj/item/electronic_assembly/attackby(obj/item/I, mob/living/user)
+	if(can_anchor && default_unfasten_wrench(user, I, 20))
+		return
+
+	if(istype(I, /obj/item/integrated_circuit_old))
+		if(!user.canUnEquip(I))
+			return FALSE
+		if(try_add_component(I, user))
+			return TRUE
+		else
+			for(var/obj/item/integrated_circuit_old/input/S in assembly_components)
+				S.attackby_react(I,user,user.combat_mode)
+			return ..()
+	else if(I.tool_behaviour == TOOL_MULTITOOL || istype(I, /obj/item/integrated_electronics/wirer) || istype(I, /obj/item/integrated_electronics/debugger))
+		if(opened)
+			interact(user)
+			return TRUE
+		else
+			to_chat(user, "<span class='warning'>[src]'s hatch is closed, so you can't fiddle with the internal components.</span>")
+			for(var/obj/item/integrated_circuit_old/input/S in assembly_components)
+				S.attackby_react(I,user,user.combat_mode)
+			return ..()
+
+	else if(istype(I, /obj/item/stock_parts/power_store/cell))
+		if(!opened)
+			to_chat(user, "<span class='warning'>[src]'s hatch is closed, so you can't access \the [src]'s power supplier.</span>")
+			for(var/obj/item/integrated_circuit_old/input/S in assembly_components)
+				S.attackby_react(I,user,user.combat_mode)
+			return ..()
+		if(battery)
+			to_chat(user, "<span class='warning'>[src] already has \a [battery] installed. Remove it first if you want to replace it.</span>")
+			for(var/obj/item/integrated_circuit_old/input/S in assembly_components)
+				S.attackby_react(I,user,user.combat_mode)
+			return ..()
+		I.forceMove(src)
+		battery = I
+		diag_hud_set_circuitstat() //update diagnostic hud
+		playsound(get_turf(src), 'sound/items/Deconstruct.ogg', 50, 1)
+		to_chat(user, "<span class='notice'>You slot the [I] inside \the [src]'s power supplier.</span>")
+		to_chat(user, "<span class='info'>Питание не считается «компонентом» схемы: в окне редактора в счётчике — только напечатанные на интегральном принтере микросхемы.</span>")
+		SStgui.update_uis(src)
+		return TRUE
+
+	else if(istype(I, /obj/item/integrated_electronics/detailer))
+		var/obj/item/integrated_electronics/detailer/D = I
+		detail_color = D.detail_color
+		update_icon()
+
+	else
+		if(user.combat_mode)
+			return ..()
+		var/list/input_selection = list()
+		//Check all the components asking for an input
+		for(var/obj/item/integrated_circuit_old/C in assembly_components)
+			if((C.demands_object_input && opened) || (C.demands_object_input && C.can_input_object_when_closed))
+				if(!C.can_accept_item(I))
+					continue
+				var/i = 0
+				//Check if there is another component with the same name and append a number for identification
+				for(var/s in input_selection)
+					var/obj/item/integrated_circuit_old/s_circuit = input_selection[s] //The for-loop iterates the keys of the associative list.
+					if(s_circuit.name == C.name && s_circuit.displayed_name == C.displayed_name && s_circuit != C)
+						i++
+				var/disp_name= "[C.displayed_name] \[[C]\]"
+				if(i)
+					disp_name += " ([i+1])"
+				//Associative lists prevent me from needing another list and using a Find proc
+				input_selection[disp_name] = C
+
+		var/obj/item/integrated_circuit_old/choice
+		if(length(input_selection))
+			if(input_selection.len == 1)
+				choice = input_selection[input_selection[1]]
+			else
+				var/selection = input(user, "Where do you want to insert that item?", "Interaction") as null|anything in input_selection
+				if(!check_interactivity(user))
+					return ..()
+				if(selection)
+					choice = input_selection[selection]
+			if(choice)
+				choice.additem(I, user)
+		for(var/obj/item/integrated_circuit_old/input/S in assembly_components)
+			S.attackby_react(I,user,user.combat_mode)
+		//	Easiest way to check if item "I" was consumed, or otherwise taken by one of the circuits.
+		//	If a circuit with demand_object_input == TRUE, or something like a scanner takes the items, prevents user from hitting assembly with it.
+		//	I could code something less hacky, but i'm pretty tired of IC logic at this point, and i want it to be as failproof as possible.
+		if(!user.is_holding(I))
+			return TRUE
+		return ..()
+
+
+/obj/item/electronic_assembly/attack_self(mob/user)
+	set waitfor = FALSE
+	if(!check_interactivity(user))
+		return
+	if(opened)
+		interact(user)
+
+	var/list/input_selection = list()
+	//Check all the components asking for an input
+	for(var/obj/item/integrated_circuit_old/input/input in assembly_components)
+		if(input.can_be_asked_input)
+			var/i = 0
+			//Check if there is another component with the same name and append a number for identification
+			for(var/s in input_selection)
+				var/obj/item/integrated_circuit_old/s_circuit = input_selection[s] //The for-loop iterates the keys of an associative list.
+				if(s_circuit.name == input.name && s_circuit.displayed_name == input.displayed_name && s_circuit != input)
+					i++
+			var/disp_name= "[input.displayed_name] \[[input]\]"
+			if(i)
+				disp_name += " ([i+1])"
+			//Associative lists prevent me from needing another list and using a Find proc
+			input_selection[disp_name] = input
+
+	var/obj/item/integrated_circuit_old/input/choice
+
+
+	if(length(input_selection))
+		if(input_selection.len ==1)
+			choice = input_selection[input_selection[1]]
+		else
+			var/selection = input(user, "What do you want to interact with?", "Interaction") as null|anything in input_selection
+			if(!check_interactivity(user))
+				return
+			if(selection)
+				choice = input_selection[selection]
+
+	if(choice)
+		choice.ask_for_input(user)
+
+/obj/item/electronic_assembly/emp_act(severity)
+	. = ..()
+	if(. & EMP_PROTECT_CONTENTS)
+		return
+	for(var/I in src)
+		var/atom/movable/AM = I
+		AM.emp_act(severity)
+
+// Returns true if power was successfully drawn.
+/obj/item/electronic_assembly/proc/draw_power(amount)
+	if(battery && battery.use(amount))
+		return TRUE
+	return FALSE
+
+// Ditto for giving.
+/obj/item/electronic_assembly/proc/give_power(amount)
+	if(battery && battery.give(amount))
+		return TRUE
+	return FALSE
+
+/obj/item/electronic_assembly/Moved(oldLoc, dir)
+	. = ..()
+	for(var/I in assembly_components)
+		var/obj/item/integrated_circuit_old/IC = I
+		IC.ext_moved(oldLoc, dir)
+	if(light) //Update lighting objects (From light circuits).
+		update_light()
+
+/obj/item/electronic_assembly/stop_pulling()
+	for(var/I in assembly_components)
+		var/obj/item/integrated_circuit_old/IC = I
+		IC.stop_pulling()
+	..()
+
+
+// Returns the object that is supposed to be used in attack messages, location checks, etc.
+// Override in children for special behavior.
+/obj/item/electronic_assembly/proc/get_object()
+	return src
+
+/obj/item/electronic_assembly/proc/get_printed_item()
+	return src
+
+// Returns the location to be used for dropping items.
+// Same as the regular drop_location(), but with checks being run on acting_object if necessary.
+/obj/item/integrated_circuit_old/drop_location()
+	var/atom/movable/acting_object = get_object()
+
+	// plz no infinite loops
+	if(acting_object == src)
+		return ..()
+
+	return acting_object.drop_location()
+
+/obj/item/electronic_assembly/attack_tk(mob/user)
+	if(anchored)
+		return
+	..()
+
+/obj/item/electronic_assembly/attack_hand(mob/user, list/modifiers)
+	if(anchored)
+		attack_self(user)
+		return
+	..()
+
+/obj/item/electronic_assembly/default //The /default electronic_assemblys are to allow the introduction of the new naming scheme without breaking old saves.
+	name = "type-a electronic assembly"
+
+/obj/item/electronic_assembly/calc
+	name = "type-b electronic assembly"
+	icon_state = "setup_small_calc"
+	desc = "It's a case, for building small electronics with. This one resembles a pocket calculator."
+
+/obj/item/electronic_assembly/clam
+	name = "type-c electronic assembly"
+	icon_state = "setup_small_clam"
+	desc = "It's a case, for building small electronics with. This one has a clamshell design."
+
+/obj/item/electronic_assembly/simple
+	name = "type-d electronic assembly"
+	icon_state = "setup_small_simple"
+	desc = "It's a case, for building small electronics with. This one has a simple design."
+
+/obj/item/electronic_assembly/hook
+	name = "type-e electronic assembly"
+	icon_state = "setup_small_hook"
+	desc = "It's a case, for building small electronics with. This one looks like it has a belt clip, but it's purely decorative."
+
+/obj/item/electronic_assembly/pda
+	name = "type-f electronic assembly"
+	icon_state = "setup_small_pda"
+	desc = "It's a case, for building small electronics with. This one resembles a PDA."
+	slot_flags = ITEM_SLOT_ID | ITEM_SLOT_BELT
+
+/obj/item/electronic_assembly/dildo
+	name = "type-g electronic assembly"
+	icon_state = "setup_dildo_medium"
+	desc = "It's a case, for building small electronics with. This one has a phallic design."
+
+/obj/item/electronic_assembly/small
+	name = "electronic device"
+	icon_state = "setup_device"
+	desc = "It's a case, for building tiny-sized electronics with."
+	w_class = WEIGHT_CLASS_TINY
+	max_components = IC_MAX_SIZE_BASE / 2
+	max_complexity = IC_COMPLEXITY_BASE / 2
+
+/obj/item/electronic_assembly/small/default
+	name = "type-a electronic device"
+
+/obj/item/electronic_assembly/small/cylinder
+	name = "type-b electronic device"
+	icon_state = "setup_device_cylinder"
+	desc = "It's a case, for building tiny-sized electronics with. This one has a cylindrical design."
+
+/obj/item/electronic_assembly/small/scanner
+	name = "type-c electronic device"
+	icon_state = "setup_device_scanner"
+	desc = "It's a case, for building tiny-sized electronics with. This one has a scanner-like design."
+
+/obj/item/electronic_assembly/small/hook
+	name = "type-d electronic device"
+	icon_state = "setup_device_hook"
+	desc = "It's a case, for building tiny-sized electronics with. This one looks like it has a belt clip, but it's purely decorative."
+
+/obj/item/electronic_assembly/small/box
+	name = "type-e electronic device"
+	icon_state = "setup_device_box"
+	desc = "It's a case, for building tiny-sized electronics with. This one has a boxy design."
+
+/obj/item/electronic_assembly/small/dildo
+	name = "type-f electronic device"
+	icon_state = "setup_dildo_small"
+	desc = "It's a case, for building tiny-sized electronics with. This one has a phallic design."
+
+/obj/item/electronic_assembly/medium
+	name = "electronic mechanism"
+	icon_state = "setup_medium"
+	desc = "It's a case, for building medium-sized electronics with."
+	w_class = WEIGHT_CLASS_NORMAL
+	max_components = IC_MAX_SIZE_BASE * 2
+	max_complexity = IC_COMPLEXITY_BASE * 2
+
+/obj/item/electronic_assembly/medium/default
+	name = "type-a electronic mechanism"
+
+/obj/item/electronic_assembly/medium/box
+	name = "type-b electronic mechanism"
+	icon_state = "setup_medium_box"
+	desc = "It's a case, for building medium-sized electronics with. This one has a boxy design."
+
+/obj/item/electronic_assembly/medium/clam
+	name = "type-c electronic mechanism"
+	icon_state = "setup_medium_clam"
+	desc = "It's a case, for building medium-sized electronics with. This one has a clamshell design."
+
+/obj/item/electronic_assembly/medium/medical
+	name = "type-d electronic mechanism"
+	icon_state = "setup_medium_med"
+	desc = "It's a case, for building medium-sized electronics with. This one resembles some type of medical apparatus."
+
+/obj/item/electronic_assembly/medium/gun
+	name = "type-e electronic mechanism"
+	icon_state = "setup_medium_gun"
+	inhand_icon_state = "circuitgun"
+	desc = "It's a case, for building medium-sized electronics with. This one resembles a gun, or some type of tool, if you're feeling optimistic. It can fire guns and throw items while the user is holding it."
+	lefthand_file = 'icons/mob/inhands/weapons/guns_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/weapons/guns_righthand.dmi'
+	can_fire_equipped = TRUE
+
+/obj/item/electronic_assembly/medium/radio
+	name = "type-f electronic mechanism"
+	icon_state = "setup_medium_radio"
+	desc = "It's a case, for building medium-sized electronics with. This one resembles an old radio."
+
+/obj/item/electronic_assembly/medium/dildo
+	name = "type-g electronic mechanism"
+	icon_state = "setup_dildo_large"
+	desc = "It's a case, for building medium-sized electronics with. This one has a phallic design."
+
+
+/obj/item/electronic_assembly/large
+	name = "electronic machine"
+	icon_state = "setup_large"
+	desc = "It's a case, for building large electronics with."
+	w_class = WEIGHT_CLASS_BULKY
+	max_components = IC_MAX_SIZE_BASE * 4
+	max_complexity = IC_COMPLEXITY_BASE * 4
+
+/obj/item/electronic_assembly/large/default
+	name = "type-a electronic machine"
+
+/obj/item/electronic_assembly/large/scope
+	name = "type-b electronic machine"
+	icon_state = "setup_large_scope"
+	desc = "It's a case, for building large electronics with. This one resembles an oscilloscope."
+
+/obj/item/electronic_assembly/large/terminal
+	name = "type-c electronic machine"
+	icon_state = "setup_large_terminal"
+	desc = "It's a case, for building large electronics with. This one resembles a computer terminal."
+
+/obj/item/electronic_assembly/large/arm
+	name = "type-d electronic machine"
+	icon_state = "setup_large_arm"
+	desc = "It's a case, for building large electronics with. This one resembles a robotic arm."
+
+/obj/item/electronic_assembly/large/tall
+	name = "type-e electronic machine"
+	icon_state = "setup_large_tall"
+	desc = "It's a case, for building large electronics with. This one has a tall design."
+
+/obj/item/electronic_assembly/large/industrial
+	name = "type-f electronic machine"
+	icon_state = "setup_large_industrial"
+	desc = "It's a case, for building large electronics with. This one resembles some kind of industrial machinery."
+
+/obj/item/electronic_assembly/drone
+	name = "electronic drone"
+	icon_state = "setup_drone"
+	desc = "It's a case, for building mobile electronics with."
+	w_class = WEIGHT_CLASS_NORMAL
+	max_components = IC_MAX_SIZE_BASE * 3
+	max_complexity = IC_COMPLEXITY_BASE * 3
+	allowed_circuit_action_flags = IC_ACTION_MOVEMENT | IC_ACTION_COMBAT | IC_ACTION_LONG_RANGE
+	can_anchor = FALSE
+
+/obj/item/electronic_assembly/drone/can_move()
+	return TRUE
+
+/obj/item/electronic_assembly/drone/default
+	name = "type-a electronic drone"
+
+/obj/item/electronic_assembly/drone/arms
+	name = "type-b electronic drone"
+	icon_state = "setup_drone_arms"
+	desc = "It's a case, for building mobile electronics with. This one is armed and dangerous."
+
+/obj/item/electronic_assembly/drone/secbot
+	name = "type-c electronic drone"
+	icon_state = "setup_drone_secbot"
+	desc = "It's a case, for building mobile electronics with. This one resembles a Securitron."
+
+/obj/item/electronic_assembly/drone/medbot
+	name = "type-d electronic drone"
+	icon_state = "setup_drone_medbot"
+	desc = "It's a case, for building mobile electronics with. This one resembles a Medibot."
+
+/obj/item/electronic_assembly/drone/genbot
+	name = "type-e electronic drone"
+	icon_state = "setup_drone_genbot"
+	desc = "It's a case, for building mobile electronics with. This one has a generic bot design."
+
+/obj/item/electronic_assembly/drone/android
+	name = "type-f electronic drone"
+	icon_state = "setup_drone_android"
+	desc = "It's a case, for building mobile electronics with. This one has a hominoid design."
+
+/obj/item/electronic_assembly/wallmount
+	name = "wall-mounted electronic assembly"
+	icon_state = "setup_wallmount_medium"
+	desc = "It's a case, for building medium-sized electronics with. It has a magnetized backing to allow it to stick to walls, but you'll still need to wrench the anchoring bolts in place to keep it on."
+	w_class = WEIGHT_CLASS_NORMAL
+	max_components = IC_MAX_SIZE_BASE * 2
+	max_complexity = IC_COMPLEXITY_BASE * 2
+
+/obj/item/electronic_assembly/wallmount/heavy
+	name = "heavy wall-mounted electronic assembly"
+	icon_state = "setup_wallmount_large"
+	desc = "It's a case, for building large electronics with. It has a magnetized backing to allow it to stick to walls, but you'll still need to wrench the anchoring bolts in place to keep it on."
+	w_class = WEIGHT_CLASS_BULKY
+	max_components = IC_MAX_SIZE_BASE * 4
+	max_complexity = IC_COMPLEXITY_BASE * 4
+
+/obj/item/electronic_assembly/wallmount/light
+	name = "light wall-mounted electronic assembly"
+	icon_state = "setup_wallmount_small"
+	desc = "It's a case, for building small electronics with. It has a magnetized backing to allow it to stick to walls, but you'll still need to wrench the anchoring bolts in place to keep it on."
+	w_class = WEIGHT_CLASS_SMALL
+	max_components = IC_MAX_SIZE_BASE
+	max_complexity = IC_COMPLEXITY_BASE
+
+/obj/item/electronic_assembly/wallmount/tiny
+	name = "tiny wall-mounted electronic assembly"
+	icon_state = "setup_wallmount_tiny"
+	desc = "It's a case, for building tiny electronics with. It has a magnetized backing to allow it to stick to walls, but you'll still need to wrench the anchoring bolts in place to keep it on."
+	w_class = WEIGHT_CLASS_TINY
+	max_components = IC_MAX_SIZE_BASE / 2
+	max_complexity = IC_COMPLEXITY_BASE / 2
+
+/obj/item/electronic_assembly/wallmount/proc/mount_assembly(turf/on_wall, mob/user) //Yeah, this is admittedly just an abridged and kitbashed version of the wallframe attach procs.
+	if(get_dist(on_wall,user)>1)
+		return
+	var/ndir = get_dir(on_wall, user)
+	if(!(ndir in GLOB.cardinals))
+		return
+	var/turf/T = get_turf(user)
+	if(!isfloorturf(T))
+		to_chat(user, "<span class='warning'>You cannot place [src] on this spot!</span>")
+		return
+	if(check_wall_item(T, ndir))
+		to_chat(user, "<span class='warning'>There's already an item on this wall!</span>")
+		return
+	playsound(src.loc, 'sound/machines/click.ogg', 75, 1)
+	user.visible_message("[user.name] attaches [src] to the wall.",
+		"<span class='notice'>You attach [src] to the wall.</span>",
+		"<span class='italics'>You hear clicking.</span>")
+	user.dropItemToGround(src)
+	switch(ndir)
+		if(NORTH)
+			pixel_y = -31
+		if(SOUTH)
+			pixel_y = 31
+		if(EAST)
+			pixel_x = -31
+		if(WEST)
+			pixel_x = 31
+	SET_PLANE_IMPLICIT(src, WALL_PLANE)
+
+/obj/item/electronic_assembly/wallmount/Moved(atom/OldLoc, Dir, Forced = FALSE) //reset the plane if moved off the wall.
+	. = ..()
+	SET_PLANE_IMPLICIT(src, GAME_PLANE)
