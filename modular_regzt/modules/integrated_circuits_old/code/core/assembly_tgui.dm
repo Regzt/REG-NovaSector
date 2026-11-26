@@ -164,27 +164,7 @@ GLOBAL_LIST_INIT(ie_integrated_circuit_ui_types, list("string", "number", "boole
 /proc/ie_ic_fundamental_type(datum/integrated_io/io)
 	if(!io)
 		return "any"
-	if(io.io_type == PULSE_CHANNEL)
-		return "signal"
-	if(istype(io, /datum/integrated_io/boolean))
-		return "boolean"
-	if(istype(io, /datum/integrated_io/number))
-		return "number"
-	if(istype(io, /datum/integrated_io/index))
-		return "index"
-	if(istype(io, /datum/integrated_io/char))
-		return "char"
-	if(istype(io, /datum/integrated_io/color))
-		return "color"
-	if(istype(io, /datum/integrated_io/dir))
-		return "dir"
-	if(istype(io, /datum/integrated_io/string))
-		return "string"
-	if(istype(io, /datum/integrated_io/lists))
-		return "list"
-	if(istype(io, /datum/integrated_io/ref) || istype(io, /datum/integrated_io/selfref))
-		return "entity"
-	return "any"
+	return io.get_data_type()
 
 /// Цвет точки порта в TGUI (имена из `CSS_COLORS`); по возможности как у wiremod.
 /proc/ie_ic_tgui_port_color(ftype)
@@ -801,7 +781,7 @@ GLOBAL_LIST_INIT(ie_integrated_circuit_ui_types, list("string", "number", "boole
 	.["ie_max_size"] = max_components
 	.["ie_used_complexity"] = return_total_complexity()
 	.["ie_max_complexity"] = max_complexity
-	.["circuit_on"] = TRUE
+	.["circuit_on"] = circuit_on
 	.["is_admin"] = FALSE
 	.["variables"] = list()
 	.["display_name"] = name
@@ -836,6 +816,12 @@ GLOBAL_LIST_INIT(ie_integrated_circuit_ui_types, list("string", "number", "boole
 		. = TRUE
 		return
 	switch(action)
+		if("ie_toggle_power")
+			circuit_on = !circuit_on
+			diag_hud_set_circuitstat()
+			playsound(src, 'sound/items/tools/screwdriver.ogg', 30, TRUE)
+			SStgui.update_uis(src)
+			. = TRUE
 		if("ie_eject_battery")
 			if(!battery || !usr)
 				return
@@ -887,7 +873,8 @@ GLOBAL_LIST_INIT(ie_integrated_circuit_ui_types, list("string", "number", "boole
 			var/datum/integrated_io/in_io = ie_ic_get_input_io(in_chip, ipid)
 			if(!out_io || !in_io)
 				return
-			if(out_io.io_type != in_io.io_type)
+			if(!out_io.can_connect(in_io))
+				to_chat(usr, span_warning("Those pins use incompatible data types."))
 				return
 			if(ie_ic_shared_host(out_chip, in_chip) != src)
 				return
@@ -1179,7 +1166,8 @@ GLOBAL_LIST_INIT(ie_integrated_circuit_ui_types, list("string", "number", "boole
 			var/datum/integrated_io/in_io = ie_ic_get_input_io(in_chip, ipid)
 			if(!out_io || !in_io)
 				return
-			if(out_io.io_type != in_io.io_type)
+			if(!out_io.can_connect(in_io))
+				to_chat(usr, span_warning("Those pins use incompatible data types."))
 				return
 			out_io.connect_pin(in_io)
 			. = TRUE

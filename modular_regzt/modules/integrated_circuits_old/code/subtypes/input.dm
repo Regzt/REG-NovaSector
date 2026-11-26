@@ -162,7 +162,6 @@
 	push_data()
 	activate_pin(2)
 
-#if 0
 /obj/item/integrated_circuit_old/input/slime_scanner
 	name = "slime_scanner"
 	desc = "A very small version of the xenobio analyser. This allows the machine to know every needed properties of slime. Output mutation list is non-associative."
@@ -185,17 +184,17 @@
 	power_draw_per_use = 80
 
 /obj/item/integrated_circuit_old/input/slime_scanner/do_work()
-	var/mob/living/simple_animal/slime/T = get_pin_data_as_type(IC_INPUT, 1, /mob/living/simple_animal/slime)
+	var/mob/living/basic/slime/T = get_pin_data_as_type(IC_INPUT, 1, /mob/living/basic/slime)
 	if(!isslime(T)) //Invalid input
 		return
 	if(T in view(get_turf(src))) // Like medbot's analyzer it can be used in range..
 
-		set_pin_data(IC_OUTPUT, 1, T.colour)
-		set_pin_data(IC_OUTPUT, 2, T.is_adult)
-		set_pin_data(IC_OUTPUT, 3, T.nutrition/T.get_max_nutrition())
+		set_pin_data(IC_OUTPUT, 1, T.slime_type?.colour)
+		set_pin_data(IC_OUTPUT, 2, T.life_stage == SLIME_LIFE_STAGE_ADULT)
+		set_pin_data(IC_OUTPUT, 3, T.nutrition / SLIME_MAX_NUTRITION)
 		set_pin_data(IC_OUTPUT, 4, T.powerlevel)
 		set_pin_data(IC_OUTPUT, 5, round(T.health/T.maxHealth,0.01)*100)
-		set_pin_data(IC_OUTPUT, 6, uniqueList(T.slime_mutation))
+		set_pin_data(IC_OUTPUT, 6, uniqueList(assoc_to_keys(T.slime_type?.mutations)))
 		set_pin_data(IC_OUTPUT, 7, T.mutation_chance)
 		set_pin_data(IC_OUTPUT, 8, T.cores)
 		set_pin_data(IC_OUTPUT, 9, T.amount_grown/SLIME_EVOLUTION_THRESHOLD)
@@ -206,8 +205,6 @@
 
 
 
-#endif
-#if 0
 /obj/item/integrated_circuit_old/input/plant_scanner
 	name = "integrated plant analyzer"
 	desc = "A very small version of the plant analyser. This allows the machine to know all valuable parameters of plants in trays. \
@@ -265,8 +262,8 @@
 		set_pin_data(IC_OUTPUT, 13, H.toxic)
 		set_pin_data(IC_OUTPUT, 14, H.waterlevel)
 		set_pin_data(IC_OUTPUT, 15, H.reagents.total_volume)
-		set_pin_data(IC_OUTPUT, 16, H.harvest)
-		set_pin_data(IC_OUTPUT, 17, H.dead)
+		set_pin_data(IC_OUTPUT, 16, H.plant_status == HYDROTRAY_PLANT_HARVESTABLE)
+		set_pin_data(IC_OUTPUT, 17, H.plant_status == HYDROTRAY_PLANT_DEAD)
 		set_pin_data(IC_OUTPUT, 18, H.plant_health)
 		set_pin_data(IC_OUTPUT, 19, H.self_sustaining)
 	push_data()
@@ -310,7 +307,6 @@
 	activate_pin(2)
 
 
-#endif
 /obj/item/integrated_circuit_old/input/examiner
 	name = "examiner"
 	desc = "It's a little machine vision system. It can return the name, description, distance, \
@@ -1111,7 +1107,6 @@
 		activate_pin(3)
 
 #endif
-#if 0
 /obj/item/integrated_circuit_old/input/matscan
 	name = "material scanner"
 	desc = "Специальная маширения получающая содержание материалов в машинерии или предметах."
@@ -1151,13 +1146,16 @@
 	if(!H)
 		return
 	var/turf/T = get_turf(src)
-	var/datum/component/material_container/mt = (H.GetComponent(/datum/component/remote_materials)?.mat_container || H.GetComponent(/datum/component/material_container))
+	var/datum/material_container/mt = H.vars["materials"]
+	if(!istype(mt))
+		mt = null
+	var/list/custom_materials = H.vars["custom_materials"]
 	var/total_amount = 0
 
 	if(!mt && (H in view(T)))
 		set_pin_data(IC_OUTPUT, 1, FALSE)
 		for(var/I in 1 to length(mtypes))
-			var/amount = H?.custom_materials?[SSmaterials.get_material(mtypes[I])] || 0
+			var/amount = custom_materials?[SSmaterials.get_material(mtypes[I])] || 0
 			set_pin_data(IC_OUTPUT, 2 + I, amount)
 			total_amount += amount
 
@@ -1175,7 +1173,6 @@
 	push_data()
 	activate_pin(2)
 
-#endif
 /obj/item/integrated_circuit_old/input/atmospheric_analyzer
 	name = "atmospheric analyzer"
 	desc = "A miniaturized analyzer which can scan anything that contains gases. Leave target as NULL to scan the air around the assembly."
@@ -1392,7 +1389,6 @@
 	push_data()
 	activate_pin(2)
 
-#if 0
 /obj/item/integrated_circuit_old/input/anomaly_scanner
 	name = "anomaly scanner"
 	desc = "A small anomaly analyzer, it is accurate enough to give the frequency, but it may make a mistake with the code. It will be equal to a random number within a radius of 10 numbers from the desired number."
@@ -1408,14 +1404,13 @@
 
 /obj/item/integrated_circuit_old/input/anomaly_scanner/do_work()
 	var/obj/effect/anomaly/T = get_pin_data_as_type(IC_INPUT, 1, /obj/effect/anomaly)
-	if(!istype(T)) //Invalid input
+	if(!istype(T) || !T.anomaly_core) //Invalid input
 		activate_pin(3)
 		return
 	if(T in view(get_turf(src))) // Like medbot's analyzer it can be used in range..
-
-		set_pin_data(IC_OUTPUT, 2, T.aSignal.code+rand(-10,10))
-		set_pin_data(IC_OUTPUT, 1, (T.aSignal.frequency))
-	push_data()
-	activate_pin(2)
-#endif
-	activate_pin(2)
+		set_pin_data(IC_OUTPUT, 2, T.anomaly_core.code + rand(-10,10))
+		set_pin_data(IC_OUTPUT, 1, T.anomaly_core.frequency)
+		push_data()
+		activate_pin(2)
+	else
+		activate_pin(3)

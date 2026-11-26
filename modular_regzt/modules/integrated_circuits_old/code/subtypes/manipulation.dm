@@ -41,7 +41,6 @@
 					return FALSE
 	return FALSE
 
-#if 0
 /obj/item/integrated_circuit_old/manipulation/plant_module
 	name = "plant manipulation module"
 	desc = "Used to uproot weeds and harvest/plant trays."
@@ -86,46 +85,36 @@
 					set_pin_data(IC_OUTPUT, 1, harvest_output)
 					push_data()
 			if(1)
-				TR.weedlevel = 0
-				TR.update_icon()
+				TR.set_weedlevel(0)
 			if(2)
-				if(TR.myseed) //Could be that they're just using it as a de-weeder
-					TR.age = 0
-					TR.plant_health = 0
-					if(TR.harvest)
-						TR.harvest = FALSE //To make sure they can't just put in another seed and insta-harvest it
-					qdel(TR.myseed)
-					TR.myseed = null
-				TR.weedlevel = 0 //Has a side effect of cleaning up those nasty weeds
-				TR.dead = 0
-				TR.update_icon()
+				TR.set_seed(null) //Also clears weeds as a side effect
 			if(3)
 				if(!check_target(O))
 					activate_pin(2)
 					return FALSE
 
-				else if(istype(O, /obj/item/seeds) && !istype(O, /obj/item/seeds/sample))
+				else if(istype(O, /obj/item/seeds))
 					if(!TR.myseed)
 						if(istype(O, /obj/item/seeds/kudzu))
 							investigate_log("had Kudzu planted in it by [acting_object] at [AREACOORD(src)]","kudzu")
-						acting_object.visible_message("<span class='notice'>[acting_object] plants [O].</span>")
-						TR.dead = 0
-						TR.myseed = O
+						acting_object.visible_message(span_notice("[acting_object] plants [O]."))
+						TR.set_seed(O)
 						TR.age = 1
 						TR.lastproduce = 0
-						TR.plant_health = TR.myseed.endurance
+						TR.set_plant_health(TR.myseed.endurance)
 						TR.lastcycle = world.time
-						O.forceMove(TR)
-						TR.machine_wake() // an asleep empty tray now holds a live plant that must grow
-						TR.update_icon()
+						TR.update_appearance()
 	activate_pin(2)
 
 /obj/item/integrated_circuit_old/manipulation/plant_module/proc/harvest(obj/machinery/hydroponics/TR)
-	if(TR.dead)
-		TR.harvest_dead()
+	if(!TR.myseed)
 		return list()
-	else
-		return TR.myseed?.harvest_userless()
+	if(TR.plant_status == HYDROTRAY_PLANT_DEAD)
+		TR.set_seed(null)
+		return list()
+	if(TR.plant_status == HYDROTRAY_PLANT_HARVESTABLE)
+		return TR.myseed.harvest(TR)
+	return list()
 
 /obj/item/integrated_circuit_old/manipulation/seed_extractor
 	name = "seed extractor module"
@@ -151,12 +140,11 @@
 	for(var/i in 1 to length(seed_output))
 		seed_output[i] = WEAKREF(seed_output[i])
 
-	if(seed_output.len)
+	if(seed_output?.len)
 		set_pin_data(IC_OUTPUT, 1, seed_output)
 		push_data()
 	activate_pin(2)
 
-#endif
 /obj/item/integrated_circuit_old/manipulation/grabber
 	name = "grabber"
 	desc = "A circuit with its own inventory for items. Used to grab and store things."
@@ -365,8 +353,8 @@
 
 
 #define MATMAN_MAX_MAT_AMOUNT 100000
+#define MATMAN_MATERIALS list(/datum/material/iron, /datum/material/glass, /datum/material/silver, /datum/material/gold, /datum/material/diamond, /datum/material/uranium, /datum/material/plasma, /datum/material/bluespace, /datum/material/bananium, /datum/material/titanium, /datum/material/plastic)
 
-#if 0
 /obj/item/integrated_circuit_old/manipulation/matman
 	name = "material manager"
 	desc = "This circuit is designed for automatic storage and distribution of materials."
@@ -420,17 +408,17 @@
 	ext_cooldown = 1
 	cooldown_per_use = 10
 
-	var/datum/component/material_container/materials
-	var/static/list/mtypes = DEFAULT_REMOTE_MATERIALS
+	var/datum/material_container/materials
+	var/static/list/mtypes = MATMAN_MATERIALS
 
 
-/obj/item/integrated_circuit_old/manipulation/matman/ComponentInitialize()
-	materials = AddComponent(/datum/component/material_container, DEFAULT_REMOTE_MATERIALS, MATMAN_MAX_MAT_AMOUNT, FALSE, /obj/item/stack, CALLBACK(src, PROC_REF(is_insertion_ready)), CALLBACK(src, PROC_REF(AfterMaterialInsert)))
+/obj/item/integrated_circuit_old/manipulation/matman/Initialize(mapload)
+	. = ..()
+	materials = new(src, MATMAN_MATERIALS, MATMAN_MAX_MAT_AMOUNT, NONE, MATMAN_MATERIALS, /obj/item/stack)
 	materials.precise_insertion = TRUE
-	.=..()
 
 /obj/item/integrated_circuit_old/manipulation/matman/proc/AfterMaterialInsert(type_inserted, id_inserted, amount_inserted)
-	set_pin_data(IC_OUTPUT, 2, materials.total_amount)
+	set_pin_data(IC_OUTPUT, 2, materials.total_amount())
 	for(var/I in 1 to length(mtypes))
 		var/amount = materials?.materials[SSmaterials.get_material(mtypes[I])] ? materials?.materials[SSmaterials.get_material(mtypes[I])] : 0
 		set_pin_data(IC_OUTPUT, I+2, amount)
@@ -459,7 +447,8 @@
 					activate_pin(4)
 					return
 
-				successful = materials.insert_stack(I, amount)
+				var/obj/item/stack/S = I
+				successful = materials.insert_item(I, min(amount, S.amount) / max(S.amount, 1))
 			else
 				successful = materials.insert_item(I)
 				if(successful) qdel(I)
@@ -471,8 +460,8 @@
 
 			AfterMaterialInsert()
 		if(2)
-			var/datum/component/material_container/mt = (H.GetComponent(/datum/component/remote_materials)?.mat_container || H.GetComponent(/datum/component/material_container))
-			if(!mt)
+			var/datum/material_container/mt = H.vars["materials"]
+			if(!istype(mt))
 				activate_pin(4)
 				return
 
@@ -484,8 +473,18 @@
 					if(!U)
 						AfterMaterialInsert()
 						continue
-					if(mt.transer_amt_to(materials, U, SSmaterials.get_material(mtypes[I])))
-						suc = TRUE
+					if(U > 0)
+						var/take = min(U, mt.materials?[M] || 0)
+						var/inserted = materials.insert_amount_mat(take, M)
+						if(inserted)
+							mt.use_amount_mat(inserted, M)
+							suc = TRUE
+					else
+						var/give = min(-U, materials.materials?[M] || 0)
+						var/inserted = mt.insert_amount_mat(give, M)
+						if(inserted)
+							materials.use_amount_mat(inserted, M)
+							suc = TRUE
 
 			if(suc)
 				activate_pin(3)
@@ -500,7 +499,9 @@
 
 
 /obj/item/integrated_circuit_old/manipulation/matman/Destroy()
-	materials.retrieve_all()
+	if(materials)
+		materials.retrieve_all()
+		QDEL_NULL(materials)
 	.=..()
 
 /obj/item/integrated_circuit_old/manipulation/matdropper
@@ -532,7 +533,7 @@
 	spawn_flags = IC_SPAWN_RESEARCH
 	power_draw_per_use = 40
 
-	var/static/list/mtypes = DEFAULT_REMOTE_MATERIALS
+	var/static/list/mtypes = MATMAN_MATERIALS
 
 /obj/item/integrated_circuit_old/manipulation/matdropper/do_work(ord)
 	var/atom/H = get_pin_data_as_type(IC_INPUT, 1, /atom)
@@ -541,15 +542,15 @@
 		activate_pin(3)
 		return
 
-	var/datum/component/material_container/mt = (H.GetComponent(/datum/component/remote_materials)?.mat_container || H.GetComponent(/datum/component/material_container))
+	var/datum/material_container/mt = H.vars["materials"]
 
-	if(!mt)
+	if(!istype(mt))
 		activate_pin(3)
 		return
 
 	var/suc = FALSE
 	for(var/I in 1 to length(mtypes))
-		if(mt.retrieve_sheets(get_pin_data(IC_INPUT, 1 + I) || 0, SSmaterials.get_material(mtypes[I]), get_turf(H)))
+		if(mt.retrieve_stack(get_pin_data(IC_INPUT, 1 + I) || 0, SSmaterials.get_material(mtypes[I]), get_turf(H)))
 			suc = TRUE
 
 	if(suc)
@@ -577,43 +578,43 @@
 	power_draw_per_use = 20
 
 /obj/item/integrated_circuit_old/manipulation/inserter/do_work()
-    var/obj/item/target_obj = get_pin_data_as_type(IC_INPUT, 1, /obj/item)
-    if(!target_obj || QDELETED(target_obj))
-        return
+	var/obj/item/target_obj = get_pin_data_as_type(IC_INPUT, 1, /obj/item)
+	if(!target_obj || QDELETED(target_obj))
+		return
 
-    var/mob/holder = loc
-    if(istype(holder))
-        if(!holder.Adjacent(target_obj))
-            return
-    else
-        if(get_dist(get_turf(src), get_turf(target_obj)) > 1)
-            return
+	var/mob/holder = loc
+	if(istype(holder))
+		if(!holder.Adjacent(target_obj))
+			return
+	else
+		if(get_dist(get_turf(src), get_turf(target_obj)) > 1)
+			return
 
-    var/obj/item/storage/container = get_pin_data_as_type(IC_INPUT, 2, /obj/item)
-    var/mode = get_pin_data(IC_INPUT, 3)
+	var/obj/item/container = get_pin_data_as_type(IC_INPUT, 2, /obj/item)
+	var/mode = get_pin_data(IC_INPUT, 3)
 
-    switch(mode)
-        if(TRUE) // Insert mode 1
-            if(!container)
-                return
+	switch(mode)
+		if(TRUE) // Insert mode 1
+			if(!container)
+				return
 
-            var/datum/component/storage/STR = container.GetComponent(/datum/component/storage)
-            if(!STR)
-                return
+			var/datum/storage/STR = container.atom_storage
+			if(!STR)
+				return
 
-            STR.attackby(src.loc, target_obj)
+			STR.attempt_insert(target_obj, ismob(loc) ? loc : null, override = TRUE)
 
-        if(FALSE) // Extract mode 0
-            if(!container || !istype(container,/obj/item/storage))
-                return
+		if(FALSE) // Extract mode 0
+			if(!container)
+				return
 
-            var/datum/component/storage/STR = container.GetComponent(/datum/component/storage)
-            if(target_obj in container.contents)
-                if(STR)
-                    STR.remove_from_storage(target_obj, get_turf(src))
+			var/datum/storage/STR = container.atom_storage
+			if(target_obj in container.contents)
+				if(STR)
+					STR.attempt_remove(target_obj, get_turf(src))
 
 // Renamer circuit. Renames the assembly it is in. Useful in cooperation with telecomms-based circuits.
-#endif
+#undef MATMAN_MATERIALS
 /obj/item/integrated_circuit_old/manipulation/renamer
 	name = "renamer"
 	desc = "A small circuit that renames the assembly it is in. Useful paired with speech-based circuits."

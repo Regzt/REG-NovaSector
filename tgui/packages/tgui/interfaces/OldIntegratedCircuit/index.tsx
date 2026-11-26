@@ -935,6 +935,7 @@ export class OldIntegratedCircuit extends Component<unknown, IntegratedCircuitSt
                   ? () => act(ie_circuit ? 'ie_eject_battery' : 'eject_circuit_cell')
                   : undefined
               }
+              onTogglePower={ie_circuit ? () => act('ie_toggle_power') : undefined}
               ieCloneCopyMode={ie_circuit ? ie_clone_copy_mode : null}
               ieUsedSize={ieUsedSize}
               ieMaxSize={ieMaxSize}

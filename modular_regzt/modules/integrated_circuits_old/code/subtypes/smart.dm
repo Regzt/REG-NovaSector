@@ -132,7 +132,6 @@
 
 
 // - MMI Tank - //
-#if 0
 /obj/item/integrated_circuit_old/input/mmi_tank
 	name = "man-machine interface tank"
 	desc = "This circuit is just a jar filled with an artificial liquid mimicking the cerebrospinal fluid."
@@ -159,23 +158,25 @@
 	power_draw_per_use = 150
 	can_be_asked_input = TRUE
 	demands_object_input = TRUE
-	expected_object_type = /obj/item/mmi
+	expected_object_type = /obj/item/brain_processor
 
-	var/obj/item/mmi/installed_brain
+	var/obj/item/brain_processor/installed_brain
 
-/obj/item/integrated_circuit_old/input/mmi_tank/attackby(obj/item/mmi/O, mob/user)
-	if(!istype(O, /obj/item/mmi))
+/obj/item/integrated_circuit_old/input/mmi_tank/attackby(obj/item/O, mob/user, list/modifiers, list/attack_modifiers)
+	var/obj/item/brain_processor/BP = O
+	if(!istype(BP))
 		to_chat(user, span_warning("You can't put that inside."))
 		return
 	if(installed_brain)
 		to_chat(user, span_warning("There's already a brain inside."))
 		return
 	user.transferItemToLoc(O, src)
-	installed_brain = O
+	installed_brain = BP
 	can_be_asked_input = FALSE
 	to_chat(user, span_notice("You gently place \the man-machine interface inside the tank."))
 	to_chat(O, span_notice("You are slowly being placed inside the man-machine-interface tank."))
-	O.brainmob.remote_control = src
+	if(BP.brainmob)
+		BP.brainmob.vars["remote_control"] = src
 	set_pin_data(IC_OUTPUT, 1, O)
 	push_data()
 
@@ -215,7 +216,7 @@
 		set_pin_data(IC_OUTPUT, 1, WEAKREF(null))
 		push_data()
 		if(installed_brain.brainmob)
-			installed_brain.brainmob.remote_control = null
+			installed_brain.brainmob.vars["remote_control"] = null
 		installed_brain = null
 
 //Brain changes
@@ -254,7 +255,6 @@
 
 /mob/living/brain/can_interact_with(atom/M, treat_mob_as_adjacent)
 	return check_bot_self
-#endif
 
 /obj/item/integrated_circuit_old/smart/advanced_pathfinder/proc/hippie_xor_decrypt()
 	var/Ps = get_pin_data(IC_INPUT, 4)
@@ -263,7 +263,6 @@
 	var/list/Pl = json_decode(XorEncrypt(hextostr(Ps, TRUE), SScircuit.cipherkey))
 	if(Pl&&islist(Pl))
 		idc.access = Pl
-#if 0
 
 // - pAI connector circuit - //
 /obj/item/integrated_circuit_old/input/pAI_connector
@@ -293,23 +292,25 @@
 	power_draw_per_use = 150
 	can_be_asked_input = TRUE
 	demands_object_input = TRUE
-	expected_object_type = /obj/item/paicard
+	expected_object_type = /obj/item/pai_card
 
-	var/obj/item/paicard/installed_pai
+	var/obj/item/pai_card/installed_pai
 
-/obj/item/integrated_circuit_old/input/pAI_connector/attackby(obj/item/paicard/O, mob/user)
-	if(!istype(O, /obj/item/paicard))
+/obj/item/integrated_circuit_old/input/pAI_connector/attackby(obj/item/O, mob/user, list/modifiers, list/attack_modifiers)
+	var/obj/item/pai_card/PC = O
+	if(!istype(PC))
 		to_chat(user, span_warning("You can't put that inside."))
 		return
 	if(installed_pai)
 		to_chat(user, span_warning("There's already a pAI connected to this."))
 		return
 	user.transferItemToLoc(O, src)
-	installed_pai = O
+	installed_pai = PC
 	can_be_asked_input = FALSE
 	to_chat(user, span_notice("You slowly connect the circuit's pins to the [installed_pai]."))
 	to_chat(O, span_notice("You are slowly being connected to the pAI connector."))
-	O.pai.remote_control = src
+	if(PC.pai)
+		PC.pai.vars["remote_control"] = src
 	set_pin_data(IC_OUTPUT, 1, O)
 	push_data()
 
@@ -349,7 +350,7 @@
 		set_pin_data(IC_OUTPUT, 1, WEAKREF(null))
 		push_data()
 		if(installed_pai.pai)
-			installed_pai.pai.remote_control = null
+			installed_pai.pai.vars["remote_control"] = null
 		installed_pai = null
 
 //pAI changes
@@ -391,4 +392,3 @@
 
 /mob/living/silicon/pai/can_interact_with(atom/M, treat_mob_as_adjacent)
 	return check_bot_self
-#endif

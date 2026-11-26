@@ -311,7 +311,6 @@
 		else
 			log_say("[name] ([type]) : [sanitized_text]")
 
-#if 0
 /obj/item/integrated_circuit_old/output/video_camera
 	name = "video camera circuit"
 	desc = "Takes a string as a name and a boolean to determine whether it is on, and uses this to be a camera linked to a list of networks you choose."
@@ -348,10 +347,12 @@
 
 /obj/item/integrated_circuit_old/output/video_camera/proc/set_camera_status(status)
 	if(camera)
-		camera.status = status
-		GLOB.cameranet.updatePortableCamera(camera)
-		power_draw_idle = camera.status ? (20 / (update_speed * 0.1)) : 0
-		if(camera.status) // Ensure that there's actually power.
+		if(status && !camera.camera_enabled)
+			camera.toggle_cam(null, FALSE)
+		else if(!status && camera.camera_enabled)
+			camera.toggle_cam(null, FALSE)
+		power_draw_idle = camera.camera_enabled ? (20 / (update_speed * 0.1)) : 0
+		if(camera.camera_enabled) // Ensure that there's actually power.
 			if(!draw_idle_power())
 				power_fail()
 
@@ -397,10 +398,9 @@
 
 /obj/item/integrated_circuit_old/output/video_camera/proc/do_camera_update(oldLoc)
 	if(!QDELETED(camera) && oldLoc != get_turf(src))
-		GLOB.cameranet.updatePortableCamera(camera)
+		SScameras.camera_moved(camera, oldLoc, get_turf(src), update_speed)
 	updating = FALSE
 
-#endif
 /obj/item/integrated_circuit_old/output/led
 	name = "light-emitting diode"
 	desc = "RGB LED. Takes a boolean value in, and if the boolean value is 'true-equivalent', the LED will be marked as lit on examine."

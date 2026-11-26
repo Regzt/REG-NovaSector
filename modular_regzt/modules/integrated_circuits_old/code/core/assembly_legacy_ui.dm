@@ -9,7 +9,7 @@
 
 	var/HTML = "<html><head>[UTF8HEADER]<title>[name]</title></head>\
 		<body><table><thead><tr> \
-		<a href='?src=[REF(src)]'>Refresh</a>  |  <a href='?src=[REF(src)];rename=1'>Rename</a>  |  <a href='?src=[REF(src)];ie_ui_mode=tgui'>TGUI interface</a><br> \
+		<a href='?src=[REF(src)]'>Refresh</a>  |  <a href='?src=[REF(src)];rename=1'>Rename</a>  |  <a href='?src=[REF(src)];toggle_power=1'>[circuit_on ? "Turn Off" : "Turn On"]</a>  |  <a href='?src=[REF(src)];ie_ui_mode=tgui'>TGUI interface</a><br> \
 		[total_part_size]/[max_components] ([round((total_part_size / max_components) * 100, 0.1)]%) space taken up in the assembly.<br> \
 		[total_complexity]/[max_complexity] ([round((total_complexity / max_complexity) * 100, 0.1)]%) maximum complexity.<br>"
 	if(battery)

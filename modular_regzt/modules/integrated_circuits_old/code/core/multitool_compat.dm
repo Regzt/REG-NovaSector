@@ -11,9 +11,8 @@
 		if(io == selected_io)
 			to_chat(user, "<span class='warning'>Wiring \the [selected_io.holder]'s [selected_io.name] into itself is rather pointless.</span>")
 			return
-		if(io.io_type != selected_io.io_type)
-			to_chat(user, "<span class='warning'>Those two types of channels are incompatible.  The first is a [selected_io.io_type], \
-			while the second is a [io.io_type].</span>")
+		if(!io.can_connect(selected_io))
+			to_chat(user, "<span class='warning'>Those two pins use incompatible data types.</span>")
 			return
 		if(io.holder.assembly && io.holder.assembly != selected_io.holder.assembly)
 			to_chat(user, "<span class='warning'>Both \the [io.holder] and \the [selected_io.holder] need to be inside the same assembly.</span>")

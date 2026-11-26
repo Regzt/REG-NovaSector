@@ -17,6 +17,7 @@
 	var/max_components = IC_MAX_SIZE_BASE
 	var/max_complexity = IC_COMPLEXITY_BASE
 	var/opened = TRUE
+	var/circuit_on = TRUE
 	var/obj/item/stock_parts/power_store/cell/battery // Internal cell which most circuits need to work.
 	var/cell_type = /obj/item/stock_parts/power_store/cell
 	var/can_charge = TRUE //Can it be charged in a recharger?
@@ -221,7 +222,7 @@
 	if(!isturf(loc) || hide)
 		set_hud_image_inactive(DIAG_STAT_HUD)
 		return
-	if(!battery || battery.charge == 0)
+	if(!circuit_on || !battery || battery.charge == 0)
 		set_hud_image_state(DIAG_STAT_HUD, hud_state = "hudoffline")
 	else if(combat_circuits) //has a circuit that can harm people
 		set_hud_image_state(DIAG_STAT_HUD, hud_state = "[prefered_hud_icon]-red")
@@ -241,6 +242,8 @@
 	set_hud_image_active(DIAG_TRACK_HUD)
 
 /obj/item/electronic_assembly/proc/handle_idle_power()
+	if(!circuit_on)
+		return
 
 	// First we generate power.
 	for(var/obj/item/integrated_circuit_old/passive/power/P in assembly_components)
@@ -278,6 +281,12 @@
 
 	if(href_list["rename"])
 		rename(usr)
+
+	if(href_list["toggle_power"])
+		circuit_on = !circuit_on
+		diag_hud_set_circuitstat()
+		playsound(src, 'sound/items/tools/screwdriver.ogg', 30, TRUE)
+		SStgui.update_uis(src)
 
 	if(href_list["remove_cell"])
 		if(!battery)

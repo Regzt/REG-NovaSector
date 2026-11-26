@@ -14,6 +14,7 @@ export const CircuitToolbar = (props) => {
     onLgbtqRainbowToggle,
     onPanToOrigin,
     onEjectPowerCell,
+    onTogglePower,
     /** Wiremod: null = нет ячейки, число = % (поле есть в ui_data). */
     circuitCellPercent,
     /** IE assembly only: null = no cell, number = charge % */
@@ -48,9 +49,12 @@ export const CircuitToolbar = (props) => {
           <Box
             className={powered
               ? 'IntegratedCircuit__chip IntegratedCircuit__chip--on'
-              : 'IntegratedCircuit__chip IntegratedCircuit__chip--off'}>
+              : 'IntegratedCircuit__chip IntegratedCircuit__chip--off'}
+            onClick={onTogglePower}
+            style={{ cursor: onTogglePower ? 'pointer' : undefined }}
+            title={onTogglePower ? 'Нажмите, чтобы включить или выключить плату' : undefined}>
             <Icon name="power-off" style={{ marginRight: '0.35em' }} />
-            {powered ? 'Плата вкл.' : 'Плата выкл.'}
+            {powered ? 'Питание вкл.' : 'Питание выкл.'}
           </Box>
         </Stack.Item>
         <Stack.Item>

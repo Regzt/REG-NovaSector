@@ -162,6 +162,38 @@ D [1]/  ||
 	return "nothing"
 
 
+/datum/integrated_io/proc/get_data_type()
+	if(io_type == PULSE_CHANNEL)
+		return "signal"
+	if(istype(src, /datum/integrated_io/boolean))
+		return "boolean"
+	if(istype(src, /datum/integrated_io/number))
+		return "number"
+	if(istype(src, /datum/integrated_io/index))
+		return "index"
+	if(istype(src, /datum/integrated_io/char))
+		return "char"
+	if(istype(src, /datum/integrated_io/color))
+		return "color"
+	if(istype(src, /datum/integrated_io/dir))
+		return "dir"
+	if(istype(src, /datum/integrated_io/string))
+		return "string"
+	if(istype(src, /datum/integrated_io/lists))
+		return "list"
+	if(istype(src, /datum/integrated_io/ref) || istype(src, /datum/integrated_io/selfref))
+		return "entity"
+	return "any"
+
+/datum/integrated_io/proc/can_connect(datum/integrated_io/pin)
+	if(!pin)
+		return FALSE
+	if(io_type != pin.io_type)
+		return FALSE
+	var/type_a = get_data_type()
+	var/type_b = pin.get_data_type()
+	return type_a == "any" || type_b == "any" || type_a == type_b
+
 /datum/integrated_io/proc/connect_pin(datum/integrated_io/pin)
 	pin.linked |= src
 	linked |= pin
